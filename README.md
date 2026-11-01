@@ -1,46 +1,40 @@
-# Zenbyte Technologies — 3D Website
+# Zenbyte Technologies — Website
 
 **Your Bridge to IT Careers.**
 
-A cinematic, fully 3D website:
+A walk through the real Zenbyte office:
 
-1. **Space intro**: stars light up one by one across the sky. One star ignites over a real NASA Earth, and its light beam reaches a person standing on the planet. The person rises into the star, and the Zenbyte logo is born from the light, followed by the company name and quotes.
-2. **The real Zenbyte office**: press **Enter Zenbyte** and fly into the star. Frosted glass doors with the Zenbyte logo open, and you walk into a real office filmed on video, with real people working. Each chapter is its own room, and every page moves you to a new spot inside it:
-   Welcome → Our record → Your journey → Visits and timing → Fees → Policies → Rewards and next steps.
-   **To use your own office videos**, see [`videos/README.md`](videos/README.md).
+1. **Logo first**: the Zenbyte logo glows over a soft, blurred view of the office entrance, with the company name, quotes and a dark **Enter Zenbyte** button (one tap works on mobile).
+2. **Walk room by room**: you walk through the office (your own walkthrough video, cleaned up and sharpened) to a computer. The computer rises into view, the camera zooms into its screen, and the screen becomes the full page.
+3. **Next page**: the page zooms back into the computer, you walk on to the next desk, and the next page opens the same way.
+
+Rooms: Reception → MD cabin → Waiting lounge → Interview corner → Counselling cabin → Café → Front office → Future corridor → Glass lounge → AI Innovation Room → Conference room → Board room.
 
 ## How to use
 
-- Scroll, use the arrow keys, swipe on mobile, or use the ↑ ↓ buttons to move between pages.
-- Click a room name in the top menu to walk straight there.
-- Click or press Space during the intro to skip it.
-- Add `#office` to the end of the address to skip the space intro.
+- Scroll, use the arrow keys, swipe left/right on mobile, or use the ↑ ↓ buttons to move between pages.
+- Click a chapter name in the top menu to walk straight there.
+- Add `#office` to the end of the address to skip the logo screen.
 
 ## Files
 
 | File | What it is |
 |---|---|
 | `index.html` | **The whole website** in one file. This is what visitors open. |
-| `src/content.js` | Room list and page renderers |
+| `media/walk-1080.mp4` | Your office walkthrough video (HD, for computers) |
+| `media/walk-720.mp4` | Same video, smaller (for phones) |
+| `media/poster.jpg` | First frame, shown while the video loads |
 | `src/P.json` | Your page text (titles, cards, notes). Edit text here. |
-| `src/main.js` | Space 3D scene + real-video office (rooms, doors, walking) |
-| `src/style.css` | Look of the text panels, menu and intro |
+| `src/main.js` | The walk: which video seconds lead to which desk (`SEG`), walking speed (`RATE`), quotes (`QUOTES`) |
+| `src/content.js` | Chapter list and page layouts |
+| `src/style.css` | Look of the logo screen, computer, pages and menu |
 | `src/shell.html` | Page skeleton |
 | `src/build.py` | Rebuilds `index.html` from the `src` files |
-| `assets/` | Logo files |
-| `videos/` | Your office videos (`room1.mp4` … `room7.mp4`) |
 
-**To change text:** edit `src/P.json` (or the `QUOTES` list at the top of `src/main.js`), then run:
+**To change text, quotes or where each walk stops:** edit the file in `src/`, then run:
 
 ```
 python3 src/build.py
 ```
 
-This writes a fresh `index.html`.
-
-## Hosting (free)
-
-GitHub Pages: **Settings → Pages → Source: Deploy from a branch → main / (root) → Save**.
-The site appears at `https://trainerkzenbyte-coder.github.io/zenbyte/`.
-
-The site needs an internet connection to load the 3D engine (three.js), the Earth photos (jsDelivr CDN), and the free stock videos (Mixkit) for any room without its own video. Stock videos: [Mixkit](https://mixkit.co/), free license, no attribution required.
+**To use a new office video:** replace the two files in `media/` (same names) and adjust the seconds in `SEG` in `src/main.js`.
