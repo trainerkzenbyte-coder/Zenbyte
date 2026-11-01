@@ -1,0 +1,31 @@
+# One-off: copies the AI-upscaled office photos (made by an earlier run) into media/stops.
+name: Collect upscaled office photos
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/collect-stills.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: parts
+          run-id: 41339488909
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Save photos
+        run: |
+          mkdir -p media/stops
+          find parts -path '*stills*' -name '*.jpg' -exec cp {} media/stops/ \;
+          ls -la media/stops
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git add media/stops
+          git commit -m "AI-upscaled office photos (Real-ESRGAN)" || exit 0
+          git pull --rebase origin main || true
+          git push
