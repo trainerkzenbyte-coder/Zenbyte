@@ -20,6 +20,20 @@ __CSS__
 </script>
 </head>
 <body>
+<!-- real office footage (behind everything) -->
+<div id="office" aria-hidden="true">
+  <div id="look"><div id="stage">
+    <video id="vA" muted loop playsinline preload="auto"></video>
+    <video id="vB" muted loop playsinline preload="auto"></video>
+  </div></div>
+  <div class="fallback"><img data-logo alt=""></div>
+  <div class="grade"></div><canvas id="grain"></canvas>
+  <div id="doors">
+    <div class="sign"><span id="sign"></span></div>
+    <div class="leaf l"><i class="bar"></i><i class="etch"></i></div>
+    <div class="leaf r"><i class="bar"></i><i class="etch"></i></div>
+  </div>
+</div>
 <canvas id="gl" aria-hidden="true"></canvas>
 <div id="flash" aria-hidden="true"></div>
 <div id="fade" aria-hidden="true"></div>
