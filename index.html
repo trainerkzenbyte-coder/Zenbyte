@@ -722,7 +722,7 @@ function showPanel(i) {
 }
 function enterOffice() {
   if (mode === 'office') return;
-  mode = 'office'; B.classList.add('office'); clearInterval(qTimer);
+  mode = 'office'; B.classList.add('office'); clearInterval(qTimer); $('hint').style.display = 'none';
   const f = $('fade'); f.style.transition = 'opacity 1.8s';
   setTimeout(() => { f.style.opacity = 0; canvas.style.display = 'none'; }, 300);
   go(0, true);
