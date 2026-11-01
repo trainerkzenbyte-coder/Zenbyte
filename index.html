@@ -194,18 +194,42 @@ body:not(.office) #office{visibility:hidden}
 body:not(.office) #panel{display:none}
 
 /* =================================================================
-   WALK-THROUGH VERSION (real Zenbyte office video + computer screens)
+   WALK-THROUGH VERSION 3: real Zenbyte office video, content shown on
+   the real screens inside each room, then zoom into the screen
    ================================================================= */
 html,body{background:#05070c}
 #scene{position:fixed;inset:0;z-index:0;overflow:hidden;background:#05070c}
-#scene video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.02);transition:filter 1.1s ease,transform 1.4s cubic-bezier(.3,.7,.2,1)}
-#scene .grade{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(0,0,0,.5) 100%),linear-gradient(180deg,rgba(5,7,12,.55) 0%,transparent 16%,transparent 78%,rgba(5,7,12,.55) 100%)}
-#grain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:overlay;opacity:.45;image-rendering:pixelated}
-body:not(.office) #scene video{filter:blur(10px) brightness(.38) saturate(1.1);transform:scale(1.12)}
-body.entering:not(.office) #scene video{filter:blur(2px) brightness(.7);transform:scale(1.04)}
-#scene.dof video{filter:blur(7px) brightness(.62) saturate(1.05);transform:scale(1.06)}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#stage video,#stage .still,#stage .occ{position:absolute;inset:0;width:100%;height:100%;display:block}
+#stage video{object-fit:fill;transition:filter 1.1s ease}
+#stage .still{opacity:0;transition:opacity .35s;object-fit:fill}
+#stage .still.on{opacity:1}
+#stage .occ{opacity:0;z-index:3;pointer-events:none;transition:opacity .6s}
+#stage .occ.on{opacity:1}
+#scene .grade{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 52%,rgba(0,0,0,.45) 100%),linear-gradient(180deg,rgba(5,7,12,.5) 0%,transparent 15%,transparent 80%,rgba(5,7,12,.5) 100%);transition:opacity .6s}
+body.zoomin #scene .grade{opacity:0}
+#grain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:overlay;opacity:.25}
+body:not(.office) #stage video{filter:blur(10px) brightness(.38) saturate(1.1)}
+body.entering:not(.office) #stage video{filter:blur(2px) brightness(.7)}
 #blink{position:fixed;inset:0;z-index:45;background:#000;opacity:0;pointer-events:none;transition:opacity .25s}
 body.blink #blink{opacity:1}
+
+/* the page shown on the real screen in the room (perspective-mapped) */
+#scr{position:absolute;left:0;top:0;transform-origin:0 0;z-index:2;opacity:0;pointer-events:none;overflow:hidden;
+ background:radial-gradient(ellipse at 70% 0%,#1b3d6b,transparent 62%),linear-gradient(160deg,#0c1830,#050a16);
+ box-shadow:0 0 60px 18px rgba(70,150,255,.45),0 0 160px 60px rgba(40,120,255,.18)}
+#scr.on{opacity:1;transition:opacity .25s}
+#scr .scr-in{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform-origin:50% 50%}
+#scr.on .scr-in{animation:powerOn .75s cubic-bezier(.2,.8,.2,1) both}
+#scr .scr-in .card{width:900px;max-height:none;overflow:visible;backdrop-filter:none;-webkit-backdrop-filter:none;background:linear-gradient(140deg,rgba(255,255,255,.12),rgba(255,255,255,.03)),rgba(10,16,34,.9);transform-origin:50% 50%}
+#scr .k{animation:none}
+#scr .bar-top{position:absolute;z-index:2;left:0;right:0;top:0;height:46px;display:flex;align-items:center;gap:12px;padding:0 22px;background:rgba(0,0,0,.35);font:700 18px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#bfeeff}
+#scr .bar-top img{height:28px}
+#scr .refl{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 30%,transparent 45%)}
+#scr .scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 2px,transparent 2px 4px);mix-blend-mode:overlay}
+#scr.flick .scr-in{animation:flick .5s steps(2) both}
+@keyframes powerOn{0%{transform:scale(1,.004);filter:brightness(4)}45%{transform:scale(1,.004);filter:brightness(4)}75%{transform:scale(1,1.02);filter:brightness(1.6)}100%{transform:none;filter:none}}
+@keyframes flick{0%{opacity:.2;filter:brightness(2.5)}50%{opacity:.9}100%{opacity:1;filter:none}}
 
 /* intro (logo first) */
 #intro{z-index:20}
@@ -217,68 +241,48 @@ body.entering #intro{opacity:0;transform:scale(1.25);filter:blur(8px);transition
 body.entering .cta{opacity:0;pointer-events:none;transition:opacity .4s}
 .cta{animation:ctaIn 1s 2.6s both,ctaPulse 2.6s 3.6s ease-in-out infinite}
 
-/* walking label */
+/* walking label + room label */
 .walk{bottom:auto;top:5.2rem}
 .walk b{color:#fff;font-weight:800}
+.room{position:fixed;z-index:30;left:50%;top:5.2rem;transform:translateX(-50%);padding:.5rem 1.1rem;border-radius:99px;background:rgba(5,8,18,.55);backdrop-filter:blur(8px);font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ice);opacity:0;transition:opacity .5s;pointer-events:none}
+.room b{color:#fff}
+body.atscreen .room{opacity:1}
 
-/* ---------- the computer ---------- */
-#desk{position:fixed;inset:0;z-index:10;pointer-events:none;will-change:transform}
-#desk.hide{visibility:hidden}
-#mon{position:absolute;left:50%;top:48%;width:min(66vw,104vh);transform:translate(-50%,-50%) translateY(80vh) rotateX(28deg) scale(.86);opacity:0;
- transition:transform 1.15s cubic-bezier(.2,.85,.25,1),opacity .6s;perspective:1200px}
-#desk.up #mon{transform:translate(-50%,-50%);opacity:1}
-.halo-light{position:absolute;left:-12%;right:-12%;top:-14%;bottom:-30%;background:radial-gradient(ellipse at 50% 42%,rgba(120,190,255,.28),transparent 62%);filter:blur(10px)}
-.bezel{position:relative;padding:1.05% 1.05% 0;border-radius:14px;background:linear-gradient(180deg,#141519,#0a0a0c);box-shadow:0 0 0 1px #2c2f35,inset 0 1px 0 rgba(255,255,255,.08),0 50px 90px rgba(0,0,0,.65),0 0 60px rgba(60,140,255,.15)}
-.screen{position:relative;aspect-ratio:16/10;border-radius:4px;overflow:hidden;background:#060a14}
-.chin{height:clamp(14px,2.6vw,30px);display:grid;place-items:center}
-.chin img{height:55%;opacity:.55;filter:grayscale(1) brightness(1.8)}
-.glare{position:absolute;inset:0;pointer-events:none;background:linear-gradient(118deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.04) 32%,transparent 46%)}
-.neck{width:13%;height:clamp(40px,9vw,110px);margin:-2px auto 0;background:linear-gradient(90deg,#6f757d,#d9dde2 30%,#f4f6f8 48%,#b6bcc3 70%,#6f757d);clip-path:polygon(8% 0,92% 0,100% 100%,0 100%);box-shadow:inset 0 10px 14px rgba(0,0,0,.4)}
-.foot{width:34%;height:clamp(7px,1.1vw,13px);margin:0 auto;border-radius:3px 3px 8px 8px;background:linear-gradient(180deg,#f2f4f6,#a4aab1 60%,#7c828a)}
-.shadow{width:62%;height:clamp(14px,2.4vw,30px);margin:-4px auto 0;background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,.75),transparent 70%)}
-/* virtual desktop shown on the computer screen (1280×800, scaled to fit) */
-.vd-wrap{position:absolute;inset:0}
-.vd-bar,.vd{position:absolute;left:0;top:0;width:1280px;transform-origin:0 0}
-.vd{height:800px;padding:84px 120px 40px;overflow:hidden;background:radial-gradient(ellipse at 70% 0%,#173257,transparent 60%),linear-gradient(160deg,#0b1424,#050810)}
-.vd-bar{display:none}
-.vd .card{max-width:760px;margin:0 auto;max-height:none;overflow:visible}
-.vd .k{animation:none}
-
-/* full-screen page (after zooming into the computer) */
-#full{position:fixed;inset:0;z-index:12;overflow:auto;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transition:opacity .35s;
- background:radial-gradient(ellipse at 70% 0%,#173257,transparent 60%),linear-gradient(160deg,#0b1424,#050810)}
+/* full-screen page (after zooming into the screen) */
+#full{position:fixed;inset:0;z-index:12;overflow:auto;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transition:opacity .3s;background:#060a14}
 #full.show{opacity:1;pointer-events:auto}
-#full .site{min-height:100%;display:flex;align-items:center;justify-content:center;padding:6.2rem clamp(1rem,4vw,3rem) 6rem}
-#full .card{width:min(760px,100%);max-height:none;overflow:visible}
-#full::before{content:"";position:fixed;inset:0;background:var(--logo) no-repeat 92% 60%/min(34vw,420px);opacity:.05;pointer-events:none}
+#full .fbg{position:fixed;inset:-40px;background:center/cover no-repeat;filter:blur(26px) brightness(.62) saturate(1.25);transform:scale(1.08)}
+#full .fshade{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(10,20,45,.15),rgba(3,5,11,.7) 90%),linear-gradient(180deg,rgba(3,5,11,.6),transparent 20%,transparent 75%,rgba(3,5,11,.7))}
+#full .fshade::after{content:"";position:absolute;inset:0;background:var(--logo) no-repeat 94% 62%/min(30vw,380px);opacity:.06}
+#full .site{position:relative;min-height:100%;display:flex;align-items:center;justify-content:center;padding:6.4rem clamp(1rem,5vw,4rem) 6.4rem}
+#full .card{width:min(820px,100%);max-height:none;overflow:visible;border-color:rgba(140,200,255,.28);
+ box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04),0 0 80px rgba(40,130,255,.18),inset 0 1px 0 rgba(255,255,255,.22)}
+#full.show .card{animation:cardIn .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
 .ui{z-index:30}
 body:not(.office) .ui{opacity:0;pointer-events:none}
 @media (max-width:900px){
- #mon{width:92vw;top:44%}
- .vd{padding:84px 60px 40px}
- #full .site{align-items:flex-start;padding:5.2rem .8rem 5.5rem}
- .walk{top:4.6rem}
+ #full .site{align-items:flex-start;padding:5.4rem .8rem 5.8rem}
+ .walk,.room{top:4.6rem}
 }
+.room,.walk{white-space:nowrap}
+body.zoomin .room{opacity:0}
 
 </style>
 </head>
 <body>
 <!-- the real Zenbyte office (your walkthrough video) -->
 <div id="scene" aria-hidden="true">
-  <video id="walk" muted playsinline webkit-playsinline preload="auto" poster="media/poster.jpg"></video>
+  <div id="stage">
+    <video id="walk" muted playsinline webkit-playsinline preload="auto" poster="media/poster.jpg"></video>
+    <img class="still" id="still" alt="">
+    <div id="scr"><div class="bar-top"><img data-logo alt="">Zenbyte Technologies</div><div class="scr-in" id="scrIn"></div><i class="scan"></i><i class="refl"></i></div>
+    <img class="occ" id="occ" alt="">
+  </div>
   <div class="grade"></div><canvas id="grain"></canvas>
 </div>
 
-<!-- the computer on the desk -->
-<div id="desk" aria-hidden="true">
-  <div id="mon">
-    <div class="halo-light"></div>
-    <div class="bezel"><div class="screen" id="screen"><div class="vd-wrap"><div class="vd-bar"><img data-logo alt=""><b>Zenbyte Technologies</b><span>zenbyte.in</span></div><div class="vd" id="vd"></div></div><i class="glare"></i></div><div class="chin"><img data-logo alt=""></div></div>
-    <div class="neck"></div><div class="foot"></div><div class="shadow"></div>
-  </div>
-</div>
-
-<!-- the page, full screen after zooming into the computer -->
+<!-- the page, full screen after zooming into the room's screen -->
 <section id="full" aria-live="polite"></section>
 
 <!-- intro: logo first -->
@@ -302,6 +306,7 @@ body:not(.office) .ui{opacity:0;pointer-events:none}
   </header>
   <nav id="rail" aria-label="Pages"></nav>
   <div class="walk">Walking to <b id="walkTo"></b>…</div>
+  <div class="room">Now in · <b id="roomName"></b></div>
   <aside class="hud" aria-live="polite"><small>Current page</small><b id="hudT"></b><div class="bar"><span id="hudB"></span></div><div class="cnt" id="hudN"></div></aside>
   <div class="arrows"><button id="prev" aria-label="Previous page">↑</button><button id="next" aria-label="Next page">↓</button></div>
 </div>
@@ -310,7 +315,9 @@ body:not(.office) .ui{opacity:0;pointer-events:none}
 <noscript><p style="position:fixed;inset:0;display:grid;place-items:center">Please enable JavaScript to view Zenbyte Technologies.</p></noscript>
 <script>
 /* =====================================================================
-   ZENBYTE — walk through the real Zenbyte office, computer to computer
+   ZENBYTE — walk through the real Zenbyte office, room by room.
+   In every room you walk up to a real screen, our page lights up on it,
+   then the camera zooms into that screen and the page opens full screen.
    ===================================================================== */
 /* ================= CONTENT (from your existing site) ================= */
 const P = [{"v": "tiles", "c": "Welcome", "e": "Welcome", "h": "Your next IT job *starts here.*", "d": "Placement support for MNCs and product-based companies. Chennai · Coimbatore · Bengaluru · Support across India.", "l": "l", "t": "c", "i": [["", "Advanced resume building tool"], ["", "Naukri optimisation"], ["", "Strong industry connect"], ["", "Strong technical team"], ["", "24×7 availability"], ["", "Offer letter"]], "n": "", "g": ""}, {"v": "tiles", "c": "Welcome", "e": "Who we are", "h": "We connect IT professionals with *the right companies.*", "d": "MNCs, product companies and many more software industries, across India.", "l": "r", "t": "c", "i": [["", "MNCs", "Top and mid-level multinational companies", []], ["", "Product companies", "Product-based software companies", []], ["", "PAN India", "Placement support for candidates across India", []], ["", "Many more", "Placements in many more software industries", []]], "n": "", "g": ""}, {"v": "tiles", "c": "Welcome", "e": "No offer, no fee", "h": "No offer, *no fee.*", "d": "You pay only after you receive your offer letter. Every term is written clearly in the agreement.", "l": "l", "t": "c", "i": [["✓", "No advance payment"], ["✓", "No registration fee"], ["✓", "No hidden charges"], ["✓", "No GST"]], "n": "", "g": ""}, {"v": "cols", "c": "Our record", "e": "Our record", "h": "Our *placement record.*", "d": "Around 50 candidates get offers every month. Approximate numbers, shown for guidance. Exact records stay confidential.", "l": "r", "t": "rec", "i": [["Data Science / ML / Data Engineer", 13], ["Java Developer", 12], ["Full Stack (React / Angular)", 10], ["Automation and Manual Testing", 9], ["Python Developer", 8], [".NET Developer", 7], ["DevOps (Azure / AWS)", 7], ["Business Analyst", 6], ["IT / Application Support", 5], ["Salesforce Developer", 4], ["MERN Stack Developer", 4], ["Gen AI Developer", 4], ["Power BI Developer", 4], ["Cyber Security / SOC", 3], ["Snowflake", 2], ["Scrum Master / Product Owner", 2]], "n": "Approximate numbers, shown for guidance. Exact records stay confidential.", "g": ""}, {"v": "cols", "c": "Our record", "e": "Companies", "h": "Where our candidates *work today.*", "d": "430+ companies have hired our candidates so far. The names are only a sample, and more are added every month.", "l": "l", "t": "c", "i": [["", "Global MNCs and consulting", "", ["Deloitte", "EY", "KPMG", "PwC", "IBM", "Accenture", "Capgemini", "NTT DATA", "CGI", "Atos", "EPAM", "Genpact", "Comcast"]], ["", "Indian IT majors", "", ["TCS", "Infosys", "Wipro", "HCLTech", "Cognizant", "Tech Mahindra", "LTIMindtree", "Mphasis", "Hexaware", "Virtusa", "Coforge", "Birlasoft", "Persistent"]], ["", "Product and platform companies", "", ["Intellect Design", "Volante Technologies", "EdgeVerve", "Newgen", "Exterro", "MoEngage", "Agilysys", "Botree", "YuppTV", "LexisNexis", "Trimble", "MicroStrategy", "Impetus"]], ["", "Banking, healthcare and more", "", ["Standard Chartered", "BNP Paribas", "Citi", "Fiserv", "Pine Labs", "Mindgate", "CAMS", "Star Health", "Optum", "CorroHealth", "Ford", "BMW TechWorks", "Volkswagen"]]], "n": "", "g": "w"}, {"v": "steps", "c": "Your journey", "e": "Your journey", "h": "Your placement journey *in five steps.*", "d": "We walk with you from your first visit to your first day at work.", "l": "r", "t": "c", "i": [["1", "Join", "Sign the agreement and share your documents in one visit.", []], ["2", "Profile", "We get your resume, Naukri profile and placement strategy ready.", []], ["3", "Calls", "Company connects and our recruiter network bring you interviews.", []], ["4", "Interview", "Advanced AI features to help you clear your interview.", []], ["5", "Offer", "Offer letter, salary talks and support after you join.", []]], "n": "", "g": ""}, {"v": "chk", "c": "Your journey", "e": "Step 1 · Join", "h": "Join *in one visit.*", "d": "Visit any of our offices once. After that, come only when needed. No daily visits and no long waiting.", "l": "l", "t": "c", "i": [["✓", "Signed agreement", "", [], "sm"], ["✓", "Resume (soft copy)", "", [], "sm"], ["✓", "Aadhaar card", "", [], "sm"], ["✓", "PAN card", "", [], "sm"], ["✓", "UAN service history", "", [], "sm"], ["✓", "Live photo and passport-size photo", "", [], "sm"], ["✓", "Original documents", "", [], "sm"], ["", "One day is enough to begin", "Visit any of our offices once. After that, come only when needed. No daily visits and no long waiting.", [], "w2"]], "n": "Bring or share these to start.", "g": "w"}, {"v": "cols", "c": "Your journey", "e": "Step 2 · Profile", "h": "We make your profile *stand out.*", "d": "Calls are slow? We review your profile again and improve it with you.", "l": "r", "t": "c", "i": [["", "Resume building", "An advanced resume building tool that shows your real skills.", []], ["", "Naukri profile optimisation", "Your Naukri profile updated with our tech team's guidance, so recruiters find you.", []], ["", "Placement strategies", "Unique placement ideas, real placement experience and our industry recruiter database.", []], ["", "Communication", "Connect with industry people: convincing skills, email writing and much more.", []]], "n": "", "g": ""}, {"v": "stag", "c": "Your journey", "e": "Step 3 · Calls", "h": "How we bring you *interview calls.*", "d": "Five channels working for you at the same time.", "l": "l", "t": "c", "i": [["", "Company connects", "Our contacts in hiring companies share openings and refer your profile.", []], ["", "Recruiter database", "Emails and phone numbers of hiring recruiters, updated every day so we use every contact.", []], ["", "Naukri profile", "An optimised profile that brings more recruiter calls.", []], ["", "Strong resume", "A resume built to be shared with the right companies.", []], ["", "Technical team advice", "Our technical team gives you the best knowledge and guidance.", []]], "n": "", "g": ""}, {"v": "steps", "c": "Your journey", "e": "Step 4 · Advanced AI Assist", "h": "Every round, *supported.*", "d": "A strong live technical team and advanced AI features help you clear your interview.", "l": "r", "t": "c", "i": [["1", "Online assessment", "", []], ["2", "Technical rounds", "", []], ["3", "Manager rounds", "", []], ["4", "Client rounds", "", []], ["5", "HR rounds", "", []]], "n": "Our team is available 24×7 to help.", "g": ""}, {"v": "big", "c": "Your journey", "e": "Step 5 · Offer", "h": "Offer, salary *and joining.*", "d": "Tell us your preferred city and expected salary.", "l": "l", "t": "c", "i": [["", "Your city", "We try our best to place you in your preferred location.", []], ["", "Your salary", "We work towards your expected CTC as much as possible.", []], ["", "Counter offers", "We will help you get a counter offer.", []]], "n": "Our support continues after you join, including replacement support if needed.", "g": ""}, {"v": "office", "c": "Visits and timing", "e": "Our offices", "h": "Three offices, *support across India.*", "d": "Pick the office closest to you.", "l": "r", "t": "c", "i": [["", "Bengaluru", "Karnataka"], ["", "Chennai", "Tamil Nadu"], ["", "Coimbatore", "Tamil Nadu"], ["Day 1", "", "Visit any office once to start your process."], ["After that", "", "Come only when needed. No daily visits, no long waiting."], ["Virtual", "", "Virtual placement support is also available, subject to minimum laptop or system configuration requirements."]], "n": "Map: DataMeet India (CC BY 4.0)", "g": ""}, {"v": "big", "c": "Visits and timing", "e": "Placement types", "h": "Two placement *support methods.*", "d": "We offer advanced AI Assist support, while panel support is currently on hold.", "l": "l", "t": "c", "i": [["", "Advanced AI Assist support", "Our advanced AI Assist support method helps you secure a placement faster.", []], ["", "Panel support through our network", "This option is currently on hold due to challenging conditions in India’s software hiring market.", []]], "n": "", "g": ""}, {"v": "cols", "c": "Visits and timing", "e": "How long it takes", "h": "Usual time to *get placed.*", "d": "Sometimes it may take longer, based on the market situation and the skill set you choose.", "l": "r", "t": "tl", "i": [], "n": "Sometimes it may take longer, based on the market situation and the skill set you choose.", "g": ""}, {"v": "steps", "c": "Fees", "e": "How you pay", "h": "Pay after your offer, *in easy EMIs.*", "d": "Pay 50% after you receive your offer letter, and the rest as monthly EMI from your take-home salary. The EMI option costs ₹50,000 more.", "l": "r", "t": "c", "i": [["1", "Pay 50% after you receive the offer letter."], ["2", "Pay the other 50% as monthly EMI from your take-home salary."]], "n": "The EMI option costs ₹50,000 more.", "g": ""}, {"v": "cols", "c": "Fees", "e": "Salary vs fee", "h": "Your salary and your fee, *side by side.*", "d": "Examples only. Your agreement shows your exact fee.", "l": "l", "t": "calc", "i": [], "n": "", "g": ""}, {"v": "big", "c": "Policies", "e": "Your replacement", "h": "If you need *a new job later.*", "d": "Replacement support depends on the take-home salary you earned in your first job.", "l": "r", "t": "c", "i": [["Free", "Less than fee + 25%", "Replacement at no cost", []], ["50%", "Between fee + 25% and double that", "of your original fee", []], ["New fee", "Double (fee + 25%) or more", "Treated as a new placement, full fee", []]], "n": "Example, fee ₹3 lakh: under ₹3.75 lakh earned → free · ₹3.75 lakh to under ₹7.5 lakh → pay ₹1.5 lakh · ₹7.5 lakh or more → new placement fee", "g": ""}, {"v": "big", "c": "Policies", "e": "Client round charges", "h": "What about *client round charges?*", "d": "If the company asks for a replacement, charges depend on the take-home salary you earned in your first job.", "l": "l", "t": "c", "i": [["Free", "Less than fee + 25%", "No client round charges", []], ["25%", "Between fee + 25% and double that", "of your original fee", []], ["30%", "Double (fee + 25%) or more", "of the fee for the new placement", []]], "n": "Example, fee ₹3 lakh: under ₹3.75 lakh earned → free · ₹3.75 lakh to under ₹7.5 lakh → ₹75,000 · ₹7.5 lakh or more → 30% of the new fee", "g": ""}, {"v": "big", "c": "Policies", "e": "Exit options", "h": "Changed your mind? *Your exit options.*", "d": "All exit terms are written clearly in the agreement.", "l": "r", "t": "c", "i": [["Free exit", "Within 5 days from the signed agreement, or 5 or fewer interviews", "If you are not selected in any of those companies.", []], ["₹75,000", "Termination, or exit after more than 5 interviews", "The same fee applies in both cases.", []]], "n": "All exit terms are written clearly in the agreement.", "g": ""}, {"v": "big", "c": "Rewards and next steps", "e": "Referral rewards", "h": "Refer friends, *earn rewards.*", "d": "Valid for 1 year from the placement date of your first referred friend.", "l": "l", "t": "c", "i": [["1 friend placed", "₹10,000 bonus", "", []], ["15 friends placed", "Bike, scooty, laptop, iPhone or an international trip", "", []], ["20 friends placed", "One free placement, for you or anyone you choose", "", []]], "n": "", "g": ""}, {"v": "faq", "c": "Rewards and next steps", "e": "Common questions", "h": "Questions candidates *usually ask.*", "d": "Any other questions? Ask your counsellor now.", "l": "r", "t": "c", "i": [["", "Do I pay anything before my offer?", "No. You pay only after the offer letter.", []], ["", "How long does it take?", "Usually 5 to 45 days, based on the market and your skills.", []], ["", "Do I need to visit every day?", "No. One visit to start, then only when needed.", []], ["", "Can I choose my job city?", "Tell us your preferred location. We try our best.", []], ["", "Is there GST or a hidden charge?", "No. Every charge is written in the agreement.", []], ["", "What if the job doesn't work out?", "Our replacement support helps you move to a new job.", []]], "n": "", "g": "w"}, {"v": "steps", "c": "Rewards and next steps", "e": "What happens next", "h": "What happens *next.*", "d": "Take your time. Decide once you are fully comfortable.", "l": "l", "t": "c", "i": [["1", "Ask us anything", "Clear every doubt with your counsellor today.", []], ["2", "Read the agreement", "Fees, policies and rules, all in writing.", []], ["3", "Sign and share", "Resume, Aadhaar, PAN, UAN history, photos and original documents.", []], ["4", "We get started", "Our team begins work on your resume and unique placement strategies.", []]], "n": "", "g": ""}, {"v": "tiles", "c": "Your Bridge to IT Careers", "e": "Thank you", "h": "Let's get *you placed.*", "d": "Chennai · Coimbatore · Bengaluru", "l": "r", "t": "c", "i": [["", "Chennai"], ["", "Coimbatore"], ["", "Bengaluru"]], "n": "", "g": ""}];
@@ -371,19 +378,24 @@ const QUOTES = [
   "No offer, no fee. Your success is our only measure.",
   "From your first visit to your first day at work, we walk with you."
 ];
-/* Where each page's walk starts and stops in the office video (seconds).
-   The walk ends at a desk; the computer then shows that page. */
-const SEG = [
-  [0, 6.6, 'Reception'], [6.6, 9.6, 'Reception desk'], [9.6, 14.3, 'MD cabin'],
-  [14.3, 20.5, 'Waiting lounge'], [20.5, 26.2, 'Interview corner'],
-  [28.4, 33.8, 'Counselling cabin'], [33.8, 37.5, 'Counselling cabin'], [37.5, 42, 'Corridor'], [42, 47.2, 'Café'],
-  [48.6, 52.5, 'Front office'], [52.5, 56.5, 'Front office'],
-  [56.5, 61, 'Future corridor'], [61, 65.5, 'Future corridor'], [65.5, 70.5, 'Glass lounge'],
-  [70.5, 74, 'Glass lounge'], [74, 79.5, 'AI Innovation Room'],
-  [79.5, 84.5, 'AI Innovation Room'], [84.5, 88.4, 'Tech corridor'], [89, 93, 'Conference room'],
-  [93, 95.35, 'Conference room'], [95.5, 99.8, 'Tech corridor'], [99.8, 104, 'Board room'], [104, 107.4, 'Board room']
+/* The rooms. All positions are in pixels of the original 816×464 video.
+   frame : the video frame where we stop in front of the screen (30 frames per second)
+   walk  : the parts of the video we walk through to get there, [from, to] in seconds
+   screen: the 4 corners of the real screen in that frame — top-left, top-right, bottom-right, bottom-left
+   ratio : shape of the page drawn on the screen (width / height)
+   cover : parts of the room that stand IN FRONT of the screen (a glass frame, a pillar), [x1, y1, x2, y2] */
+const ROOMS_3D = [
+  { name: 'Reception',       frame: 285,  walk: [[0, 9.5]],                    screen: [[334.3, 175.7], [396.7, 190], [396.7, 245], [333.3, 249]], ratio: 16 / 9 },
+  { name: 'Glass lounge',    frame: 2232, walk: [[61, 74.4]],                  screen: [[566.7, 129], [676, 93.3], [674, 233.3], [566.7, 219]],      ratio: 16 / 9, cover: [[579.3, 0, 592, 464]] },
+  { name: 'Conference room', frame: 2388, walk: [[74.4, 79.6]],                screen: [[310.7, 55], [515.7, 58.3], [515.7, 162.7], [310.7, 162.7]], ratio: 16 / 9, cover: [[350.8, 30, 419.4, 200]] },
+  { name: 'Strategy room',   frame: 2724, walk: [[79.6, 88.35], [89.0, 90.8]], screen: [[359.5, 153], [552, 148.5], [552, 252], [359.5, 251]],       ratio: 16 / 9 },
+  { name: 'Innovation wall', frame: 2904, walk: [[90.8, 95.35], [95.5, 96.8]], screen: [[195, 74], [505, 101], [505, 297], [195, 305]],             ratio: 1.5 },
+  { name: 'Board room',      frame: 3150, walk: [[96.8, 105.0]],               screen: [[481.7, 195], [679.3, 184], [678.3, 304], [481.7, 278.3]],  ratio: 16 / 9 }
 ];
-const RATE = 1.15;   // walking speed
+/* which room shows which page (page numbers start at 0) */
+const PAGE_AT = [0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5];
+const WALK_SECONDS = 6.5;   // how long a walk between rooms should take
+const VW = 816, VH = 464;   // size of the original video
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id), B = document.body;
@@ -392,12 +404,15 @@ const MOB = Math.min(innerWidth, innerHeight) < 700;
 const LOGO_SRC = $('logo').src;
 document.querySelectorAll('[data-logo]').forEach(e => e.tagName === 'LINK' ? e.href = LOGO_SRC : e.src = LOGO_SRC);
 document.documentElement.style.setProperty('--logo', `url(${LOGO_SRC})`);
+const stillURL = r => `media/stops/stop-${r.frame}${MOB ? '-m' : ''}.jpg`;
 
-const video = $('walk');
+const video = $('walk'), stage = $('stage'), still = $('still'), occ = $('occ'), scr = $('scr'), scrIn = $('scrIn'), full = $('full');
 const big = innerWidth * (devicePixelRatio || 1) > 1500 && !MOB;
 video.src = big ? 'media/walk-1080.mp4' : 'media/walk-720.mp4';
-video.playbackRate = RATE;
 video.addEventListener('error', () => { if (big && !video.dataset.retry) { video.dataset.retry = 1; video.src = 'media/walk-720.mp4'; } });
+/* preload the room photos (sharp AI-upscaled frames) */
+const okStill = {};
+ROOMS_3D.forEach((r, k) => { const im = new Image(); im.onload = () => okStill[k] = true; im.src = stillURL(r); });
 
 /* ---------- intro: logo first ---------- */
 $('name').innerHTML = $('name').textContent.split('').map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
@@ -414,77 +429,176 @@ function enterNow(e) {
 }
 $('cta').addEventListener('pointerup', enterNow); $('cta').addEventListener('click', enterNow);
 
-/* ---------- the computer (monitor) ---------- */
-const desk = $('desk'), mon = $('mon'), screenEl = $('screen'), vd = $('vd'), full = $('full'), scene = $('scene');
-function fitVD() { const w = screenEl.clientWidth; vd.style.transform = `scale(${w / 1280})`; }
-new ResizeObserver(fitVD).observe(screenEl);
-function zoomTransform() {
-  desk.style.transition = 'none'; const t = desk.style.transform; desk.style.transform = 'none';
-  const r = screenEl.getBoundingClientRect(), d = desk.getBoundingClientRect(); desk.style.transform = t; void desk.offsetWidth;
-  const z = Math.max(innerWidth / r.width, innerHeight / r.height) * 1.002;
-  const ox = r.left + r.width / 2 - d.left, oy = r.top + r.height / 2 - d.top;
-  desk.style.transformOrigin = `${ox}px ${oy}px`;
-  return `translate(${innerWidth / 2 - (r.left + r.width / 2)}px, ${innerHeight / 2 - (r.top + r.height / 2)}px) scale(${z})`;
+/* ---------- camera: the video is laid out to cover the screen, then panned / zoomed ---------- */
+let S = 1, panX = 0, panY = 0, focus = null;          // focus = room whose screen we look at
+function layout() {
+  const W = innerWidth, H = innerHeight;
+  S = Math.max(W / VW, H / VH);
+  const w = VW * S, h = VH * S;
+  panX = (W - w) / 2; panY = (H - h) / 2;
+  if (focus) {                                         // keep the screen in view on narrow (phone) screens
+    const c = centre(focus.screen);
+    panX = Math.min(0, Math.max(W - w, W / 2 - c[0] * S));
+    panY = Math.min(0, Math.max(H - h, H * .46 - c[1] * S));
+  }
+  stage.style.width = w + 'px'; stage.style.height = h + 'px';
+  stage.style.left = panX + 'px'; stage.style.top = panY + 'px';
+  if (focus) placeScreen(focus);
 }
-function staticCopy(from, to) {
-  to.innerHTML = from.innerHTML;
-  to.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
-  to.querySelectorAll('[data-h]').forEach(e => { e.style.transition = 'none'; e.style.height = e.dataset.h + '%'; });
-  to.querySelectorAll('[data-w]').forEach(e => { e.style.transition = 'none'; e.style.width = e.dataset.w + '%'; });
-  to.querySelectorAll('input').forEach(e => e.disabled = true);
+const centre = q => [(q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4, (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4];
+function zoomTo(r, on, ms) {
+  stage.style.transition = ms ? `transform ${ms}ms cubic-bezier(.62,0,.22,1), left .9s cubic-bezier(.4,0,.2,1), top .9s cubic-bezier(.4,0,.2,1)` : 'none';
+  if (!on) { stage.style.transform = 'none'; return; }
+  const q = r.screen, xs = q.map(p => p[0]), ys = q.map(p => p[1]);
+  const x0 = Math.min(...xs) * S, x1 = Math.max(...xs) * S, y0 = Math.min(...ys) * S, y1 = Math.max(...ys) * S;
+  const W = innerWidth, H = innerHeight;
+  const z = Math.min(W / (x1 - x0), H / (y1 - y0)) * 1.04;
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;            // centre of the screen inside the stage
+  const tx = W / 2 - panX - cx * z, ty = H / 2 - panY - cy * z;
+  stage.style.transform = `translate(${tx}px,${ty}px) scale(${z})`;
+}
+
+/* ---------- perspective: map the flat page onto the 4 corners of the real screen ---------- */
+function homography(w, h, q) {
+  const src = [[0, 0], [w, 0], [w, h], [0, h]], A = [], b = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = src[i], [u, v] = q[i];
+    A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); b.push(u);
+    A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); b.push(v);
+  }
+  for (let c = 0; c < 8; c++) {                       // Gaussian elimination
+    let p = c; for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    [A[c], A[p]] = [A[p], A[c]]; [b[c], b[p]] = [b[p], b[c]];
+    for (let r = 0; r < 8; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k]; b[r] -= f * b[c]; }
+  }
+  const h8 = b.map((v, i) => v / A[i][i]);
+  return `matrix3d(${h8[0]},${h8[3]},0,${h8[6]},${h8[1]},${h8[4]},0,${h8[7]},0,0,1,0,${h8[2]},${h8[5]},0,1)`;
+}
+const SW = 1280;
+function placeScreen(r) {
+  const SH = Math.round(SW / r.ratio);
+  scr.style.width = SW + 'px'; scr.style.height = SH + 'px';
+  scr.style.transform = homography(SW, SH, r.screen.map(p => [p[0] * S, p[1] * S]));
+  /* things standing in front of the screen are drawn again on top of it */
+  if (r.cover) occ.style.clipPath = 'polygon(evenodd,' + r.cover.map(([a, b2, c, d]) => {
+    const X = v => (v / VW * 100) + '%', Y = v => (v / VH * 100) + '%';
+    return `${X(a)} ${Y(b2)},${X(c)} ${Y(b2)},${X(c)} ${Y(d)},${X(a)} ${Y(d)},${X(a)} ${Y(b2)}`;
+  }).join(',') + ')';
+}
+function fitCard() {
+  const c = scrIn.querySelector('.card'); if (!c) return;
+  const SH = parseFloat(scr.style.height);
+  c.style.transform = 'none';
+  const k = Math.min(1.25, (SW - 120) / c.offsetWidth, (SH - 110) / c.offsetHeight);
+  c.style.transform = `scale(${k})`; c.style.marginTop = '46px';
+}
+function screenPage(i) {
+  scrIn.innerHTML = pageHTML(i);
+  scrIn.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+  scrIn.querySelectorAll('[data-h]').forEach(e => { e.style.transition = 'none'; e.style.height = e.dataset.h + '%'; });
+  scrIn.querySelectorAll('[data-w]').forEach(e => { e.style.transition = 'none'; e.style.width = e.dataset.w + '%'; });
+  scrIn.querySelectorAll('input').forEach(e => e.disabled = true);
+  fitCard();
+}
+function fullPage(i, r) {
+  full.innerHTML = `<div class="fbg" style="background-image:url('${okStill[ROOMS_3D.indexOf(r)] ? stillURL(r) : 'media/poster.jpg'}')"></div><div class="fshade"></div><div class="site">${pageHTML(i)}</div>`;
+  afterRender(i, full);
+  full.scrollTop = 0;
+  /* make the page fill big screens nicely */
+  const c = full.querySelector('.card');
+  if (c && innerWidth > 900) {
+    const k = Math.max(1, Math.min(1.55, (innerWidth * .78) / c.offsetWidth, (innerHeight - 190) / c.offsetHeight));
+    c.style.zoom = k.toFixed(3);
+  }
 }
 
 /* ---------- walking ---------- */
-let page = -1, busy = false, queued = null, zoomed = false;
-function playTo(end) {
+let page = -1, room = -1, busy = false, queued = null, zoomed = false;
+function playTo(end, rate) {
   return new Promise(res => {
     let done = false;
     const stop = () => { if (done) return; done = true; video.pause(); res(); };
-    const tick = () => { if (done) return; if (video.currentTime >= end - .04 || video.ended) stop(); else requestAnimationFrame(tick); };
-    video.playbackRate = RATE; video.play().catch(() => {}); requestAnimationFrame(tick);
-    setTimeout(stop, ((end - video.currentTime) / RATE) * 1000 + 6000);   // safety if the video stalls
+    const tick = () => { if (done) return; if (video.currentTime >= end - .03 || video.ended) stop(); else requestAnimationFrame(tick); };
+    video.playbackRate = rate; video.play().catch(() => {}); requestAnimationFrame(tick);
+    setTimeout(stop, ((end - video.currentTime) / rate) * 1000 + 6000);   // safety if the video stalls
   });
 }
 function seekTo(t) {
-  return new Promise(res => { if (Math.abs(video.currentTime - t) < .05) return res();
-    const on = () => { video.removeEventListener('seeked', on); res(); }; video.addEventListener('seeked', on); video.currentTime = t; setTimeout(res, 2500); });
+  return new Promise(res => {
+    if (Math.abs(video.currentTime - t) < .02) return res();
+    const on = () => { video.removeEventListener('seeked', on); res(); };
+    video.addEventListener('seeked', on); video.currentTime = t; setTimeout(res, 2500);
+  });
 }
-async function leaveComputer() {
+async function zoomOut() {                       // from the full page back to the screen in the room
   if (!zoomed) return;
-  full.classList.remove('show'); await wait(320);
-  desk.classList.remove('hide'); desk.style.transition = 'transform 1s cubic-bezier(.6,0,.2,1)'; desk.style.transform = 'none';
-  await wait(950);
-  desk.classList.remove('up'); scene.classList.remove('dof'); await wait(650);
+  full.classList.remove('show'); B.classList.remove('zoomin');
+  zoomTo(ROOMS_3D[room], false, 1300); await wait(700);
+  if (ROOMS_3D[room].cover && okStill[room]) occ.classList.add('on');
+  await wait(650);
   zoomed = false;
 }
-async function arriveAt(i) {
-  /* prepare the page: real one (full screen) + a copy on the computer screen */
-  full.innerHTML = `<div class="site">${pageHTML(i)}</div>`; afterRender(i, full);
-  staticCopy(full, vd); vd.scrollTop = 0;
-  scene.classList.add('dof');
-  desk.style.transition = 'none'; desk.style.transform = 'none'; desk.classList.remove('hide');
-  await wait(30); desk.classList.add('up');                 // the computer comes into view
-  await wait(1250);
-  desk.style.transform = zoomTransform(); void desk.offsetWidth;
-  desk.style.transition = 'transform 1.25s cubic-bezier(.65,0,.25,1)'; desk.style.transform = zoomTransform();
-  await wait(1200);
-  full.scrollTop = 0; full.classList.add('show'); zoomed = true;
-  await wait(380); desk.classList.add('hide');
+async function leaveScreen() {
+  await zoomOut();
+  scr.classList.remove('on'); occ.classList.remove('on'); B.classList.remove('atscreen');
+  await wait(250);
+  still.classList.remove('on');
+  focus = null; layout();
+}
+async function walkTo(k) {
+  const r = ROOMS_3D[k], parts = r.walk;
+  const total = parts.reduce((s, p) => s + p[1] - p[0], 0);
+  const rate = Math.min(2.2, Math.max(1.1, total / WALK_SECONDS));
+  $('walkTo').textContent = r.name; B.classList.add('walking');
+  for (let j = 0; j < parts.length; j++) {
+    const [s, e] = parts[j];
+    if (Math.abs(video.currentTime - s) > .3) {
+      const cut = j > 0;                          // a cut inside the walk is quick, a jump gets a blink
+      B.classList.add('blink'); await wait(cut ? 120 : 260); await seekTo(s); B.classList.remove('blink');
+    }
+    await playTo(e, rate);
+  }
+  await seekTo((r.frame + .5) / 30);             // land exactly on the frame with the screen
+  B.classList.remove('walking');
+}
+async function arrive(k, i) {
+  const r = ROOMS_3D[k];
+  focus = r; layout();                           // on phones the camera turns towards the screen
+  if (okStill[k]) { still.src = occ.src = stillURL(r); still.classList.add('on'); }
+  else { occ.removeAttribute('src'); }
+  $('roomName').textContent = r.name; B.classList.add('atscreen');
+  screenPage(i);
+  await wait(MOB ? 700 : 350);
+  scr.classList.add('on'); if (r.cover && okStill[k]) occ.classList.add('on');
+  await wait(1500);                              // the page lights up on the screen
+}
+async function zoomIn(i) {
+  const r = ROOMS_3D[room];
+  fullPage(i, r);
+  B.classList.add('zoomin'); occ.classList.remove('on');   // the camera moves past whatever stands in front
+  zoomTo(r, true, 1500); await wait(1380);
+  full.classList.add('show'); zoomed = true;
+  await wait(400);
 }
 async function go(i, first) {
   i = Math.max(0, Math.min(P.length - 1, i));
   if (busy) { queued = i; return; }
   if (i === page && !first) return;
   busy = true;
+  const k = PAGE_AT[i];
   page = i; updateNav();
-  await leaveComputer();
-  const [s, e, place] = SEG[i];
-  $('walkTo').textContent = place;
-  B.classList.add('walking');
-  if (Math.abs(video.currentTime - s) > .35) { B.classList.add('blink'); await wait(260); await seekTo(s); B.classList.remove('blink'); }
-  await playTo(e);
-  B.classList.remove('walking');
-  await arriveAt(i);
+  if (k === room && zoomed) {
+    /* same room: back to the screen, it switches to the next page, zoom in again */
+    await zoomOut();
+    scr.classList.add('flick'); screenPage(i); await wait(700); scr.classList.remove('flick');
+    await zoomIn(i);
+  } else {
+    await leaveScreen();
+    room = k;
+    await walkTo(k);
+    await arrive(k, i);
+    await zoomIn(i);
+  }
   busy = false;
   if (queued !== null) { const q = queued; queued = null; go(q); }
 }
@@ -500,7 +614,7 @@ function updateNav() {
   [...chap.children].forEach((b, k) => b.classList.toggle('on', k === PAGE_ROOM[page]));
   [...rail.children].forEach((b, i) => b.classList.toggle('on', i === page));
   $('hudT').textContent = P[page].e; $('hudB').style.width = ((page + 1) / P.length * 100) + '%';
-  $('hudN').textContent = String(page + 1).padStart(2, '0') + ' / ' + P.length + '  ·  ' + SEG[page][2];
+  $('hudN').textContent = String(page + 1).padStart(2, '0') + ' / ' + P.length + '  ·  ' + ROOMS_3D[PAGE_AT[page]].name;
   $('prev').disabled = page === 0; $('next').disabled = page === P.length - 1;
 }
 let wheelLock = 0;
@@ -521,13 +635,14 @@ let tx0 = 0, ty0 = 0;
 addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; ty0 = e.touches[0].clientY; }, { passive: true });
 addEventListener('touchend', e => { if (mode !== 'office') return; const dx = tx0 - e.changedTouches[0].clientX, dy = ty0 - e.changedTouches[0].clientY;
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(page + (dx > 0 ? 1 : -1)); }, { passive: true });
-addEventListener('resize', () => { if (zoomed) { desk.style.transition = 'none'; desk.style.transform = zoomTransform(); } });
+addEventListener('resize', () => { layout(); if (zoomed) zoomTo(ROOMS_3D[room], true, 0); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && !video.paused) video.pause(); });
+layout();
 
-/* ---------- film grain over the footage ---------- */
+/* ---------- light film grain over the footage ---------- */
 (function () {
   const c = $('grain'), x = c.getContext('2d'); c.width = c.height = 160; const d = x.createImageData(160, 160); let f = 0;
-  (function tick() { if (f++ % 3 === 0) { for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 18; } x.putImageData(d, 0, 0); } requestAnimationFrame(tick); })();
+  (function tick() { if (f++ % 3 === 0) { for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 14; } x.putImageData(d, 0, 0); } requestAnimationFrame(tick); })();
 })();
 if (location.hash === '#office') enterNow();
 

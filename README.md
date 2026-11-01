@@ -5,10 +5,12 @@
 A walk through the real Zenbyte office:
 
 1. **Logo first**: the Zenbyte logo glows over a soft, blurred view of the office entrance, with the company name, quotes and a dark **Enter Zenbyte** button (one tap works on mobile).
-2. **Walk room by room**: you walk through the office (your own walkthrough video, cleaned up and sharpened) to a computer. The computer rises into view, the camera zooms into its screen, and the screen becomes the full page.
-3. **Next page**: the page zooms back into the computer, you walk on to the next desk, and the next page opens the same way.
+2. **Room by room**: you walk into each room of your office video and stop in front of a real screen in that room (TV, video wall, conference display). The page lights up on that screen, in the right perspective, then the camera zooms into the screen and the page opens full screen.
+3. **Next page**: inside the same room the camera zooms back to the screen and it switches to the next page. When the chapter changes you walk on to the next room and its screen.
 
-Rooms: Reception → MD cabin → Waiting lounge → Interview corner → Counselling cabin → Café → Front office → Future corridor → Glass lounge → AI Innovation Room → Conference room → Board room.
+Rooms and screens: Reception (wall TV) → Glass lounge (TV) → Conference room (wall display) → Strategy room (wall display) → Innovation wall (video wall) → Board room (large display).
+
+**Picture quality**: the original render is only 816×464. The workflow `.github/workflows/upscale.yml` upscales it 4× for free with the open-source AI model Real-ESRGAN on GitHub's own computers, and saves sharp HD frames for every screen stop in `media/stops/`.
 
 ## How to use
 
@@ -24,8 +26,10 @@ Rooms: Reception → MD cabin → Waiting lounge → Interview corner → Counse
 | `media/walk-1080.mp4` | Your office walkthrough video (HD, for computers) |
 | `media/walk-720.mp4` | Same video, smaller (for phones) |
 | `media/poster.jpg` | First frame, shown while the video loads |
+| `media/stops/` | Sharp AI-upscaled photo of each screen stop |
+| `media/source/byte.mp4` | Your original video (input for the upscaler) |
 | `src/P.json` | Your page text (titles, cards, notes). Edit text here. |
-| `src/main.js` | The walk: which video seconds lead to which desk (`SEG`), walking speed (`RATE`), quotes (`QUOTES`) |
+| `src/main.js` | The rooms (`ROOMS_3D`: walk, stop frame, screen corners), which page shows in which room (`PAGE_AT`), quotes (`QUOTES`) |
 | `src/content.js` | Chapter list and page layouts |
 | `src/style.css` | Look of the logo screen, computer, pages and menu |
 | `src/shell.html` | Page skeleton |
@@ -37,4 +41,4 @@ Rooms: Reception → MD cabin → Waiting lounge → Interview corner → Counse
 python3 src/build.py
 ```
 
-**To use a new office video:** replace the two files in `media/` (same names) and adjust the seconds in `SEG` in `src/main.js`.
+**To use a new office video:** put it at `media/source/byte.mp4`, change any number in `.github/upscale/stills.txt` (the stop frames) so the upscaler runs again, and update `ROOMS_3D` in `src/main.js`.

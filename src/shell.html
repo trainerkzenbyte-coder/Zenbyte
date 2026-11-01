@@ -16,20 +16,16 @@ __CSS__
 <body>
 <!-- the real Zenbyte office (your walkthrough video) -->
 <div id="scene" aria-hidden="true">
-  <video id="walk" muted playsinline webkit-playsinline preload="auto" poster="media/poster.jpg"></video>
+  <div id="stage">
+    <video id="walk" muted playsinline webkit-playsinline preload="auto" poster="media/poster.jpg"></video>
+    <img class="still" id="still" alt="">
+    <div id="scr"><div class="bar-top"><img data-logo alt="">Zenbyte Technologies</div><div class="scr-in" id="scrIn"></div><i class="scan"></i><i class="refl"></i></div>
+    <img class="occ" id="occ" alt="">
+  </div>
   <div class="grade"></div><canvas id="grain"></canvas>
 </div>
 
-<!-- the computer on the desk -->
-<div id="desk" aria-hidden="true">
-  <div id="mon">
-    <div class="halo-light"></div>
-    <div class="bezel"><div class="screen" id="screen"><div class="vd-wrap"><div class="vd-bar"><img data-logo alt=""><b>Zenbyte Technologies</b><span>zenbyte.in</span></div><div class="vd" id="vd"></div></div><i class="glare"></i></div><div class="chin"><img data-logo alt=""></div></div>
-    <div class="neck"></div><div class="foot"></div><div class="shadow"></div>
-  </div>
-</div>
-
-<!-- the page, full screen after zooming into the computer -->
+<!-- the page, full screen after zooming into the room's screen -->
 <section id="full" aria-live="polite"></section>
 
 <!-- intro: logo first -->
@@ -53,6 +49,7 @@ __CSS__
   </header>
   <nav id="rail" aria-label="Pages"></nav>
   <div class="walk">Walking to <b id="walkTo"></b>…</div>
+  <div class="room">Now in · <b id="roomName"></b></div>
   <aside class="hud" aria-live="polite"><small>Current page</small><b id="hudT"></b><div class="bar"><span id="hudB"></span></div><div class="cnt" id="hudN"></div></aside>
   <div class="arrows"><button id="prev" aria-label="Previous page">↑</button><button id="next" aria-label="Next page">↓</button></div>
 </div>
