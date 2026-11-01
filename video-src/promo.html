@@ -1,0 +1,108 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+__FONTS__
+html,body{margin:0;background:#000;overflow:hidden}
+#gl{position:fixed;inset:0;width:100%;height:100%}
+.cap{position:fixed;left:0;right:0;text-align:center;color:#fff;font-family:Cormorant,serif;pointer-events:none}
+#top{top:7.5%;}
+#top small{display:block;font:600 22px Inter,sans-serif;letter-spacing:.42em;text-transform:uppercase;color:#e8c27c;margin-bottom:22px}
+#top b{display:block;font-weight:500;font-size:84px;line-height:1.02}
+#top b em{font-style:italic;background:linear-gradient(100deg,#f6dfae,#e8c27c 45%,#c9944a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#line{top:7.5%;}
+#end{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 45%,rgba(10,22,48,.85),rgba(0,0,0,.96) 70%);opacity:0}
+#end img{width:190px;margin-bottom:34px}
+#end b{font-weight:500;font-size:96px;line-height:1}
+#end i{display:block;margin:22px 0 40px;font:600 24px Inter,sans-serif;letter-spacing:.42em;text-transform:uppercase;font-style:normal;color:#e8c27c}
+#end span{font:500 30px Inter,sans-serif;color:#aab4c6;letter-spacing:.04em}
+#end u{display:block;margin-top:56px;text-decoration:none;font:italic 500 46px Cormorant,serif;color:#cfe9ff}
+</style></head>
+<body>
+<canvas id="gl"></canvas>
+<div class="cap" id="top"><small>Zenbyte Technologies</small><b id="capText"></b></div>
+<div class="cap" id="end"><img src="data:image/png;base64,__LOGO__"><b>Zenbyte Technologies</b><i>Your Bridge to IT Careers</i><span>Chennai · Coimbatore · Bengaluru · across India</span><u>No offer, no fee.</u></div>
+<script>__THREE__</script>
+<script>
+const T=THREE, W=innerWidth, H=innerHeight, PORTRAIT=H>W;
+const renderer=new T.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(1);renderer.setSize(W,H,false);
+renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.outputColorSpace=T.SRGBColorSpace;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+const scene=new T.Scene();scene.background=new T.Color(0x07080c);scene.fog=new T.Fog(0x07080c,9,22);
+scene.environment=new T.PMREMGenerator(renderer).fromScene(new T.RoomEnvironment(renderer),.04).texture;
+const camera=new T.PerspectiveCamera(PORTRAIT?38:30,W/H,.05,60);
+
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=8;return t}
+function rounded(w,h,r){const s=new T.Shape(),x=-w/2,y=-h/2;s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);s.lineTo(x+r,y+h);s.quadraticCurveTo(x,y+h,x,y+h-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);return s}
+
+/* desk: dark walnut */
+const wood=canvasTex(1024,1024,(x,w,h)=>{x.fillStyle='#3a2416';x.fillRect(0,0,w,h);x.filter='blur(1.2px)';for(let i=0;i<260;i++){const y=Math.random()*h;x.strokeStyle=`rgba(${90+Math.random()*60|0},${55+Math.random()*35|0},${28+Math.random()*20|0},${.03+Math.random()*.06})`;x.lineWidth=1+Math.random()*3;x.beginPath();x.moveTo(0,y);for(let X=0;X<=w;X+=32)x.lineTo(X,y+Math.sin(X*.01+i)*4+Math.random()*1.5);x.stroke()}});
+wood.wrapS=wood.wrapT=T.RepeatWrapping;wood.repeat.set(1.2,1.2);
+const desk=new T.Mesh(new T.PlaneGeometry(30,16),new T.MeshPhysicalMaterial({map:wood,roughness:.6,metalness:0,clearcoat:.15,clearcoatRoughness:.6,envMapIntensity:.15}));
+desk.rotation.x=-Math.PI/2;desk.receiveShadow=true;scene.add(desk);
+const wall=new T.Mesh(new T.PlaneGeometry(40,20),new T.MeshStandardMaterial({color:0x1d1814,roughness:.95,envMapIntensity:.2}));wall.position.set(0,6,-6);scene.add(wall);
+
+/* laptop (sizes in decimetres, like a 14-inch laptop) */
+const alu=new T.MeshPhysicalMaterial({color:0x6a6e75,metalness:.85,roughness:.38,envMapIntensity:.3});
+const darkAlu=new T.MeshPhysicalMaterial({color:0x2b2e33,metalness:1,roughness:.38});
+const laptop=new T.Group();scene.add(laptop);
+const BW=3.12,BD=2.21,BT=.075;
+const baseGeo=new T.ExtrudeGeometry(rounded(BW,BD,.12),{depth:BT,bevelEnabled:true,bevelThickness:.012,bevelSize:.012,bevelSegments:3});
+const base=new T.Mesh(baseGeo,alu);base.rotation.x=-Math.PI/2;base.castShadow=true;base.receiveShadow=true;laptop.add(base);
+/* keyboard deck */
+const kb=canvasTex(2048,1450,(x,w,h)=>{x.fillStyle='#5f636a';x.fillRect(0,0,w,h);
+ const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(255,255,255,.08)');g.addColorStop(1,'rgba(0,0,0,.08)');x.fillStyle=g;x.fillRect(0,0,w,h);
+ x.fillStyle='#0c0d10';x.fillRect(150,150,w-300,640);
+ const rows=[14,14,14,13,12,10],kw=(w-340)/14.2;let y=170;
+ rows.forEach((n,r)=>{let X=170;const kh=r===0?52:96;for(let i=0;i<n;i++){let ww=kw-10;if(r===5&&i===4)ww=kw*4.6-10;if(r>0&&(i===0||i===n-1)&&n<14)ww=kw*(1+(14-n)/2)-10;x.fillStyle='#16171b';x.beginPath();x.roundRect(X,y,ww,kh,9);x.fill();x.fillStyle='rgba(255,255,255,.06)';x.fillRect(X+4,y+3,ww-8,2);X+=ww+10}y+=kh+12});
+ x.fillStyle='#575b62';x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=3;x.beginPath();x.roundRect(w/2-380,860,760,480,22);x.fill();x.stroke();
+ x.fillStyle='#202226';x.fillRect(150,150,40,640);x.fillRect(w-190,150,40,640)});
+const deck=new T.Mesh(new T.PlaneGeometry(BW-.04,BD-.04),new T.MeshStandardMaterial({map:kb,metalness:.2,roughness:.5,envMapIntensity:.25}));
+deck.rotation.x=-Math.PI/2;deck.position.y=BT+.013;laptop.add(deck);
+/* lid */
+const lid=new T.Group();lid.position.set(0,BT+.01,-BD/2+.02);laptop.add(lid);
+const LH=2.05;
+const lidShell=new T.Mesh(new T.ExtrudeGeometry(rounded(BW,LH,.12),{depth:.05,bevelEnabled:true,bevelThickness:.01,bevelSize:.01,bevelSegments:3}),alu);
+lidShell.position.set(0,LH/2,-.06);lidShell.castShadow=true;lid.add(lidShell);
+const bezel=new T.Mesh(new T.PlaneGeometry(BW-.03,LH-.03),new T.MeshPhysicalMaterial({color:0x050506,roughness:.15,metalness:0,clearcoat:1}));
+bezel.position.set(0,LH/2,.006);lid.add(bezel);
+const SW=BW-.17,SH=SW*900/1440;
+const screenTex=new T.Texture();screenTex.colorSpace=T.SRGBColorSpace;screenTex.anisotropy=8;screenTex.generateMipmaps=true;screenTex.minFilter=T.LinearMipmapLinearFilter;
+const screen=new T.Mesh(new T.PlaneGeometry(SW,SH),new T.MeshBasicMaterial({map:screenTex,toneMapped:false}));
+screen.position.set(0,LH/2+.035,.011);lid.add(screen);
+/* glass reflection on the screen */
+const refl=new T.Mesh(new T.PlaneGeometry(SW,SH),new T.MeshBasicMaterial({map:canvasTex(512,512,(x,w,h)=>{const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,'rgba(255,255,255,.10)');g.addColorStop(.35,'rgba(255,255,255,.03)');g.addColorStop(.5,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,w,h)}),transparent:true,depthWrite:false,blending:T.AdditiveBlending}));
+refl.position.copy(screen.position);refl.position.z+=.002;lid.add(refl);
+lid.rotation.x=-.3;
+/* screen light spill on the desk */
+const spill=new T.RectAreaLight?null:null;
+const glow=new T.PointLight(0x7fb4ff,.9,3.5,2);glow.position.set(0,1.1,-.2);laptop.add(glow);
+laptop.rotation.y=PORTRAIT?.0:-.0;
+
+/* lights */
+const key=new T.SpotLight(0xffe2c0,32,20,.55,.7,1.5);key.position.set(-3.5,6,3.5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.0004;scene.add(key);key.target=laptop;
+const rim=new T.DirectionalLight(0x6fa8ff,1.2);rim.position.set(4,3,-5);scene.add(rim);
+scene.add(new T.HemisphereLight(0x303848,0x0a0806,.35));
+
+/* captions over time */
+const CAPS=[[0,'Your bridge to <em>IT careers.</em>'],[8.0,'No offer, <em>no fee.</em>'],[10.7,'Proof, month <em>after month.</em>'],[16.3,'Five steps to <em>your offer.</em>'],[27.5,'Three offices across <em>India.</em>'],[30.3,'Pay only <em>after success.</em>'],[33.1,'Refer friends, <em>earn rewards.</em>'],[35.9,'Let\'s get <em>you placed.</em>']];
+const capEl=document.getElementById('capText'),topEl=document.getElementById('top'),endEl=document.getElementById('end');
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+let curCap=-1;
+window.frame=async function(t,src,total){
+  const img=new Image();img.src=src;await img.decode();screenTex.image=img;screenTex.needsUpdate=true;
+  /* camera: a slow cinematic push-in with a gentle arc */
+  const u=cl(t/total),e=ease(u);
+  const ang=(-.16+.26*e), dist=(PORTRAIT?10.2:6.4)-(PORTRAIT?1.3:1.2)*e, hgt=(PORTRAIT?2.7:2.3)-.5*e;
+  camera.position.set(Math.sin(ang)*dist,hgt,Math.cos(ang)*dist);
+  camera.lookAt(0,PORTRAIT?.78:.9,-.35);
+  /* captions */
+  let k=0;CAPS.forEach((c,i)=>{if(t>=c[0])k=i});
+  if(k!==curCap){curCap=k;capEl.innerHTML=CAPS[k][1]}
+  const into=t-CAPS[k][0],next=(CAPS[k+1]?CAPS[k+1][0]:total)-t;
+  topEl.style.opacity=cl(Math.min(into/.5,next/.4))*(1-cl((t-(total-3.2))/.6));
+  topEl.style.transform=`translateY(${(1-cl(into/.6))*14}px)`;
+  endEl.style.opacity=cl((t-(total-3.0))/.8);
+  renderer.render(scene,camera);
+};
+</script></body></html>
