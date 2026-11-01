@@ -1,18 +1,27 @@
 # Office videos
 
-Each room of the website plays one real office video. Put your clips in this folder with **exactly these names**:
+The website shows real office footage (people working, talking, meeting) behind every page.
 
-| File name | Room | Free clip used until you add yours |
-|---|---|---|
-| `room1.mp4` | 1 · Welcome (entrance / lobby) | [Open office space and staircase](https://mixkit.co/free-stock-video/open-office-space-and-staircase-917/) |
-| `room2.mp4` | 2 · Our record | [Busy office space](https://mixkit.co/free-stock-video/busy-office-space-918/) |
-| `room3.mp4` | 3 · Your journey | [People working in the office](https://mixkit.co/free-stock-video/people-working-in-the-office-42617/) |
-| `room4.mp4` | 4 · Visits and timing | [Two coworkers talking and laughing](https://mixkit.co/free-stock-video/two-coworkers-talking-and-laughing-4872/) |
-| `room5.mp4` | 5 · Fees | [People having a work meeting around a table](https://mixkit.co/free-stock-video/people-having-a-work-meeting-around-a-table-4547/) |
-| `room6.mp4` | 6 · Policies | [Colleagues reading a report together](https://mixkit.co/free-stock-video/colleagues-reading-a-report-together-313/) |
-| `room7.mp4` | 7 · Rewards and next steps | [Two office men approving data with a handshake](https://mixkit.co/free-stock-video/two-office-men-approving-data-with-a-handshake-30010/) |
+**Free stock clips** are copied into this folder automatically by the GitHub workflow
+`.github/workflows/fetch-videos.yml` (Actions tab → *Fetch office videos* → *Run workflow*).
+Files are named by clip number, e.g. `918.mp4` + `918.jpg` (the photo shown instantly while the video loads).
+Source: [Mixkit](https://mixkit.co/), free license, no attribution required.
 
-## Tips for recording your own Zenbyte office clips
+| Room | Clips (Mixkit numbers) |
+|---|---|
+| 1 · Welcome | 917 open office & staircase · 4809 team meeting |
+| 2 · Our record | 918 busy office · 42617 people working |
+| 3 · Your journey | 42620 laptops · 5676 coworkers discussing · 4835 typing |
+| 4 · Visits and timing | 4872 coworkers laughing · 315 walking in office hall |
+| 5 · Fees | 4547 meeting around a table · 42644 meeting room |
+| 6 · Policies | 313 reading a report · 46680 brainstorming |
+| 7 · Rewards | 30010 handshake · 46750 CEO with team · 42666 presentation |
+
+**Your own Zenbyte office later:** upload a clip named `room1.mp4` … `room7.mp4` here.
+It replaces the stock clips for that whole room automatically.
+
+## Tips for recording your own clips
+
 - Hold the phone **sideways** (landscape), 10–20 seconds per clip, with steady, slow movement (walk slowly or use a gimbal).
 - Good shots: the entrance door, the reception, the team working at desks, a meeting, a handshake with a placed candidate.
 - Keep each file under about 25 MB. Phone 1080p is perfect.

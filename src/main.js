@@ -66,7 +66,7 @@ const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous');
 function loadTex(name, srgb = true) {
   const fin = track();
   return new Promise(res => {
-    const to = setTimeout(() => { fin(); res(null); }, 9000);
+    const to = setTimeout(() => { fin(); res(null); }, 6000);
     loader.load(TEX + name, t => { clearTimeout(to); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = ANISO; fin(); res(t); }, undefined, () => { clearTimeout(to); fin(); res(null); });
   });
 }
@@ -251,7 +251,12 @@ let T = 0, mode = 'loading', warp = -1, rt = 0;
 function stage() { STAGES.forEach(s => { if (T >= s[0] && !B.classList.contains(s[1])) { B.classList.add(s[1]); if (s[1] === 's-quote') startQuotes(); } }); $('hint').style.opacity = mode === 'space' && T < 13.5 ? 1 : 0; }
 function skip() { if (mode === 'space' && T < END) T = END; }
 addEventListener('click', e => { if (!e.target.closest('button,input,.card')) skip(); });
-$('cta').addEventListener('click', e => { e.stopPropagation(); if (mode === 'space' && warp < 0) warp = 0; });
+function enterNow(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  if (mode === 'loading') { B.classList.add('leaving'); $('load').classList.add('off'); $('fade').style.background = '#000'; $('fade').style.opacity = 1; T = END; enterOffice(); return; }
+  if (mode === 'space' && warp < 0) { warp = 0; if (T < 8) T = 8; B.classList.add('leaving'); }
+}
+$('cta').addEventListener('pointerup', enterNow); $('cta').addEventListener('click', enterNow);
 
 const v3 = new THREE.Vector3(), v4 = new THREE.Vector3(), camDir = new THREE.Vector3();
 let mx = 0, my = 0; addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
@@ -302,52 +307,62 @@ function spaceFrame(dt) {
   }
 }
 /* ======================================================================
-   PART 2 — THE REAL ZENBYTE OFFICE (real filmed video, one room per chapter)
+   PART 2 — THE REAL ZENBYTE OFFICE (real filmed video, people working)
    ----------------------------------------------------------------------
-   Each room plays a real office video. The site first looks for YOUR clip
-   in the  videos/  folder (videos/room1.mp4 … videos/room7.mp4). If that
-   file is not there yet, it uses the free Mixkit clip listed below.
+   Every page shows a real office clip. Clips live in the  videos/  folder
+   of the website (copied there automatically by the GitHub workflow
+   .github/workflows/fetch-videos.yml). Your own clip  videos/roomN.mp4
+   always wins for room N. Each clip's photo (videos/<id>.jpg) shows
+   instantly, so the background is never empty.
    ====================================================================== */
-const ROOM_VIDEO = [
-  { id: 917,   title: 'Open office space and staircase' },          // 1 Welcome (lobby)
-  { id: 918,   title: 'Busy office space' },                        // 2 Our record
-  { id: 42617, title: 'People working in the office' },             // 3 Your journey
-  { id: 4872,  title: 'Two coworkers talking and laughing' },       // 4 Visits and timing
-  { id: 4547,  title: 'People having a work meeting around a table' }, // 5 Fees
-  { id: 313,   title: 'Colleagues reading a report together' },     // 6 Policies
-  { id: 30010, title: 'Two office men approving data with a handshake' } // 7 Rewards
-];
-const srcList = k => [`videos/room${k + 1}.mp4`, `https://assets.mixkit.co/videos/${ROOM_VIDEO[k].id}/${ROOM_VIDEO[k].id}-720.mp4`];
+const CLIPS = {
+  917: 'Open office space and staircase', 4809: 'Business people at work meeting',
+  918: 'Busy office space', 42617: 'People working in the office',
+  42620: 'People working on laptops', 5676: 'Businesswoman asks coworker about idea', 4835: 'Office workers typing on their devices',
+  4872: 'Two coworkers talking and laughing', 315: 'Two business people walk in an office hall',
+  4547: 'People having a work meeting around a table', 42644: 'Business meeting in a meeting room',
+  313: 'Colleagues reading a report together', 46680: 'Brainstorming over the meeting table',
+  30010: 'Two office men approving data with a handshake', 46750: 'CEO giving feedback to his team', 42666: 'Presentation during a work team meeting'
+};
+const ROOM_CLIPS = [[917, 4809], [918, 42617], [42620, 5676, 4835], [4872, 315], [4547, 42644], [313, 46680], [30010, 46750, 42666]];
+const MIX = 'https://assets.mixkit.co/videos/';
+function clipOf(i) { const k = PAGE_ROOM[i], j = ROOMS[k].pages.indexOf(i), c = ROOM_CLIPS[k]; return { k, id: c[j % c.length], key: k + ':' + c[j % c.length] }; }
+const srcList = c => [`videos/room${c.k + 1}.mp4`, `videos/${c.id}.mp4`, `${MIX}${c.id}/${c.id}-720.mp4`];
+const posterCSS = c => `url(videos/${c.id}.jpg), url(${MIX}${c.id}/${c.id}-thumb-720-0.jpg)`;
 
-const vids = [$('vA'), $('vB')], stageEl = $('stage'), doorsEl = $('doors');
-let front = 0;                       // index of the visible <video>
-const loaded = [-1, -1];             // which room each <video> holds
-const inflight = [null, null];
-function loadRoom(vi, k) {
+const pls = [...document.querySelectorAll('#stage .pl')], vids = pls.map(p => p.querySelector('video')), phs = pls.map(p => p.querySelector('.ph'));
+const stageEl = $('stage'), doorsEl = $('doors');
+let front = 0; const loaded = ['', ''], inflight = [null, null];
+function loadClip(vi, c) {
   const v = vids[vi];
-  if (loaded[vi] === k) return Promise.resolve(true);
-  if (inflight[vi] && inflight[vi].k === k) return inflight[vi].p;
+  phs[vi].style.backgroundImage = posterCSS(c);
+  if (loaded[vi] === c.key) return Promise.resolve(true);
+  if (inflight[vi] && inflight[vi].key === c.key) return inflight[vi].p;
   const p = new Promise(res => {
-    const list = srcList(k); let i = 0, finished = false;
-    const fin = ok => { if (finished) return; finished = true; v.onloadeddata = v.onerror = null; loaded[vi] = ok ? k : -1; if (vi === front) B.classList.toggle('novideo', !ok); res(ok); };
-    const next = () => { if (i >= list.length) return fin(false); v.src = list[i++]; v.load(); };
-    v.onloadeddata = () => fin(true); v.onerror = next; next();
-    setTimeout(() => fin(v.readyState >= 2), 12000);
+    const list = srcList(c); let i = 0, finished = false;
+    const fin = ok => { if (finished) return; finished = true; v.onloadeddata = v.onerror = null; loaded[vi] = ok ? c.key : ''; pls[vi].classList.toggle('vid', ok); res(ok); };
+    const next = () => { if (finished) return; if (i >= list.length) return fin(false); v.src = list[i++]; v.load(); };
+    pls[vi].classList.remove('vid'); v.onloadeddata = () => fin(true); v.onerror = next; next();
+    setTimeout(() => fin(v.readyState >= 2), 9000);
   });
-  inflight[vi] = { k, p }; p.then(() => { if (inflight[vi] && inflight[vi].p === p) inflight[vi] = null; });
+  inflight[vi] = { key: c.key, p }; p.then(() => { if (inflight[vi] && inflight[vi].p === p) inflight[vi] = null; });
   return p;
 }
 function view(i) {
-  const k = PAGE_ROOM[i], r = ROOMS[k], j = r.pages.indexOf(i), n = r.pages.length;
-  const OX = [50, 32, 68, 40, 62, 50], OY = [50, 42, 55, 60, 45, 50];
-  return { s: 1.04 + j * .045, ox: OX[j % 6], oy: OY[j % 6], t: j / n };
+  const j = ROOMS[PAGE_ROOM[i]].pages.indexOf(i);
+  const OX = [50, 34, 66, 42, 60, 50], OY = [50, 45, 55, 58, 45, 50];
+  return { s: 1.04 + (j % 3) * .04, ox: OX[j % 6], oy: OY[j % 6], t: (j * .37) % 1 };
 }
-function frame(v, s, ox, oy, ms) {
-  stageEl.style.transition = `transform ${ms}ms cubic-bezier(.25,.8,.25,1), filter ${ms}ms`;
-  stageEl.style.transformOrigin = `${ox}% ${oy}%`;
-  stageEl.style.transform = `scale(${s})`;
+function frame(s, ox, oy, ms) {
+  stageEl.style.transition = `transform ${ms}ms cubic-bezier(.25,.8,.25,1)`;
+  stageEl.style.transformOrigin = `${ox}% ${oy}%`; stageEl.style.transform = `scale(${s})`;
 }
-function seek(v, t) { if (v.duration && isFinite(v.duration)) v.currentTime = Math.max(0, Math.min(v.duration - .5, t * v.duration)); }
+function seek(v, t) { try { if (v.duration && isFinite(v.duration)) v.currentTime = Math.max(0, Math.min(v.duration - .5, t * v.duration)); } catch (e) {} }
+function swapTo(back, t) {
+  const v = vids[back]; seek(v, t); v.play().catch(() => {});
+  pls[front].classList.remove('on'); pls[back].classList.add('on');
+  const old = vids[front]; setTimeout(() => old.pause(), 900); front = back;
+}
 
 let page = -1, busy = false, queued = null;
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -356,36 +371,42 @@ async function go(i, first) {
   if (busy) { queued = i; return; }
   if (i === page && !first) return;
   busy = true;
-  const kA = first ? -1 : PAGE_ROOM[page], kB = PAGE_ROOM[i], V = view(i);
+  const kA = first ? -1 : PAGE_ROOM[page], C = clipOf(i), kB = C.k, V = view(i);
+  const sameClip = !first && clipOf(page).key === C.key;
   page = i; updateNav(); hidePanel();
   if (kA !== kB) {
-    /* ---- walk to a glass door, it opens, walk into the next room ---- */
+    /* ---- walk up to a glass door, it opens, walk into the next room ---- */
     B.classList.add('walking');
     $('sign').textContent = String(kB + 1).padStart(2, '0') + '  ·  ' + ROOMS[kB].name.toUpperCase();
-    const back = 1 - front;
-    const ready = loadRoom(back, kB);                                  // start loading next room now
-    if (!first) { stageEl.classList.add('blurwalk'); frame(vids[front], 1.32, 50, 50, 1100); doorsEl.className = 'closing'; await wait(1150); }
-    else { doorsEl.className = 'closed'; await wait(60); }
-    await ready;
-    vids[back].currentTime = 0; seek(vids[back], V.t); vids[back].play().catch(() => {});
-    vids[front].classList.remove('on'); vids[back].classList.add('on'); vids[front].pause(); front = back;
-    B.classList.toggle('novideo', loaded[front] !== kB);
-    stageEl.style.transition = 'none'; stageEl.style.transformOrigin = '50% 50%'; stageEl.style.transform = 'scale(1.32)'; stageEl.classList.add('blurwalk');
-    await wait(first ? 700 : 350);
+    const back = 1 - front, ready = loadClip(back, C);
+    if (!first) { stageEl.classList.add('blurwalk'); frame(1.3, 50, 50, 1100); doorsEl.className = 'closing'; await wait(1150); }
+    else { doorsEl.className = 'closed'; }
+    await Promise.race([ready, wait(first ? 3500 : 2500)]);
+    swapTo(back, V.t);
+    stageEl.style.transition = 'none'; stageEl.style.transformOrigin = '50% 50%'; stageEl.style.transform = 'scale(1.3)'; stageEl.classList.add('blurwalk');
+    await wait(first ? 500 : 300);
     doorsEl.className = 'opening';
-    requestAnimationFrame(() => { stageEl.classList.remove('blurwalk'); frame(vids[front], V.s, V.ox, V.oy, 2600); });
+    requestAnimationFrame(() => { stageEl.classList.remove('blurwalk'); frame(V.s, V.ox, V.oy, 2600); });
     await wait(1700); B.classList.remove('walking'); doorsEl.className = '';
     showPanel(i);
-    await wait(600);
-    /* preload the following room in the hidden player */
-    if (kB + 1 < ROOMS.length) loadRoom(1 - front, kB + 1);
+  } else if (sameClip) {
+    /* ---- step to another spot in the same scene ---- */
+    stageEl.classList.add('blurwalk'); frame(V.s + .12, V.ox, V.oy, 700); await wait(520);
+    seek(vids[front], V.t); stageEl.classList.remove('blurwalk'); frame(V.s, V.ox, V.oy, 1600);
+    await wait(450); showPanel(i);
   } else {
-    /* ---- move to another spot inside the same room ---- */
-    stageEl.classList.add('blurwalk'); frame(vids[front], V.s + .12, V.ox, V.oy, 700); await wait(520);
-    seek(vids[front], V.t);
-    stageEl.classList.remove('blurwalk'); frame(vids[front], V.s, V.ox, V.oy, 1600);
-    await wait(500); showPanel(i);
+    /* ---- walk deeper into the room: new people, new scene ---- */
+    const back = 1 - front, ready = loadClip(back, C);
+    stageEl.classList.add('blurwalk'); frame(V.s + .16, 50, 50, 900);
+    await Promise.race([ready, wait(2200)]); await wait(200);
+    swapTo(back, V.t);
+    stageEl.style.transition = 'none'; stageEl.style.transform = `scale(${V.s + .14})`;
+    requestAnimationFrame(() => { stageEl.classList.remove('blurwalk'); frame(V.s, V.ox, V.oy, 1800); });
+    await wait(600); showPanel(i);
   }
+  /* get the next page's clip ready in the hidden player */
+  const nx = page + 1 < P.length ? clipOf(page + 1) : null;
+  if (nx && nx.key !== clipOf(page).key) loadClip(1 - front, nx);
   busy = false;
   if (queued !== null) { const q = queued; queued = null; go(q); }
 }
@@ -424,7 +445,7 @@ addEventListener('wheel', e => {
   const n = Date.now(); if (n < wheelLock || Math.abs(e.deltaY) < 10 || busy) return; wheelLock = n + 1100; go(page + (e.deltaY > 0 ? 1 : -1));
 }, { passive: true });
 addEventListener('keydown', e => {
-  if (mode === 'space') { if ([' ', 'Enter', 'Escape'].includes(e.key)) { e.preventDefault(); if (T >= END && e.key === 'Enter') $('cta').click(); else skip(); } return; }
+  if (mode === 'space') { if ([' ', 'Enter', 'Escape'].includes(e.key)) { e.preventDefault(); if (e.key === 'Enter') enterNow(); else skip(); } return; }
   if (mode !== 'office') return;
   if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(page + 1); }
   else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(page - 1); }
@@ -435,6 +456,8 @@ addEventListener('touchend', e => { if (mode !== 'office' || e.target.closest('.
 /* gentle "head movement" with the mouse */
 addEventListener('pointermove', e => { if (mode === 'office') $('look').style.transform = `translate(${(e.clientX / innerWidth - .5) * -14}px,${(e.clientY / innerHeight - .5) * -9}px)`; });
 document.addEventListener('visibilitychange', () => { if (mode === 'office') document.hidden ? vids[front].pause() : vids[front].play().catch(() => {}); });
+/* mobile browsers sometimes block autoplay until a tap: retry on the first tap */
+addEventListener('pointerdown', () => { if (mode === 'office' && vids[front].paused) vids[front].play().catch(() => {}); });
 
 /* film grain for the real footage */
 (function grain() {
@@ -459,8 +482,8 @@ Promise.all([loadTex('earth-blue-marble.jpg'), loadTex('earth-night.jpg'), loadT
     if (day && night && water) { earthU.uDay.value = day; earthU.uNight.value = night; earthU.uSpec.value = water; earthU.uHas.value = 1; }
     if (skyT) { skyMat.map = skyT; skyMat.needsUpdate = true; sky.visible = true; }
     renderer.compile(space, sCam);
-    $('load').classList.add('off'); mode = 'space';
-    loadRoom(1, 0);   /* start downloading the first office video during the intro */
+    $('load').classList.add('off'); if (mode === 'office') return; mode = 'space';
+    loadClip(1, clipOf(0));   /* start downloading the first office video during the intro */
     if (matchMedia('(prefers-reduced-motion: reduce)').matches || location.hash === '#office') { T = END; $('fade').style.background = '#000'; $('fade').style.opacity = 1; enterOffice(); }
   });
 requestAnimationFrame(loop);

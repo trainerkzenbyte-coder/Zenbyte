@@ -1,0 +1,55 @@
+# Copies the free real-office video clips (Mixkit, free license, no attribution required)
+# into the videos/ folder so the website serves them itself — fast and reliable on every device.
+# Runs automatically when this file changes; you can also run it from the Actions tab.
+name: Fetch office videos
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fetch-videos.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: Download and optimise clips
+        run: |
+          mkdir -p videos
+          IDS="917 4809 918 42617 42620 5676 4835 4872 315 4547 42644 313 46680 30010 46750 42666"
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36"
+          for id in $IDS; do
+            if [ ! -f "videos/$id.mp4" ]; then
+              ok=0
+              for q in 720 1080 360; do
+                if curl -fsSL -A "$UA" -e "https://mixkit.co/" --retry 3 "https://assets.mixkit.co/videos/$id/$id-$q.mp4" -o "/tmp/$id.mp4"; then ok=1; break; fi
+              done
+              if [ "$ok" = 1 ]; then
+                ffmpeg -v error -y -i "/tmp/$id.mp4" -an -t 20 -vf "scale=1280:-2" -c:v libx264 -preset veryfast -crf 27 -pix_fmt yuv420p -movflags +faststart "videos/$id.mp4"
+                echo "✓ video $id ($(du -h videos/$id.mp4 | cut -f1))"
+              else
+                echo "✗ could not download video $id"
+              fi
+            fi
+            if [ ! -f "videos/$id.jpg" ]; then
+              curl -fsSL -A "$UA" -e "https://mixkit.co/" --retry 3 "https://assets.mixkit.co/videos/$id/$id-thumb-720-0.jpg" -o "videos/$id.jpg" \
+                || { [ -f "videos/$id.mp4" ] && ffmpeg -v error -y -ss 1 -i "videos/$id.mp4" -frames:v 1 -q:v 4 "videos/$id.jpg"; } \
+                || echo "✗ no photo for $id"
+            fi
+          done
+          ls -lh videos
+
+      - name: Commit clips
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git add videos
+          git diff --cached --quiet && echo "Nothing new" || (git commit -m "Add office video clips" && git push)
