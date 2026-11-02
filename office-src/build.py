@@ -11,7 +11,7 @@ content = open(os.path.join(R, 'src/content.js')).read().replace('__PDATA__', js
 html = open(os.path.join(D, 'src/shell.html')).read()
 for k, v in [('__FONTS__', fonts), ('__CSS__', open(os.path.join(D, 'src/style.css')).read()),
              ('__THREE__', open(os.path.join(D, 'src/three.bundle.js')).read()),
-             ('__XBOT__', b64(os.path.join(D, 'models/Xbot.glb'))), ('__CONTENT__', content),
+             ('__MAN__', b64(os.path.join(D, 'models/man.glb'))), ('__WOMAN__', b64(os.path.join(D, 'models/woman.glb'))), ('__CONTENT__', content),
              ('__APP__', open(os.path.join(D, 'src/app.js')).read()), ('__LOGO__', b64(os.path.join(R, 'assets/logo-star.png')))]:
     html = html.replace(k, v)
 open(OUT, 'w').write(html); print(OUT, len(html))

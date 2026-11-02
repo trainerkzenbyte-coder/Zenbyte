@@ -32,7 +32,8 @@ __CSS__
 <aside id="panel" class="panel out right" aria-live="polite"></aside>
 <nav id="rail" aria-label="Pages"></nav>
 <div class="ctrl">
-  <span class="hint">Drag to look around</span>
+  <span class="hint">Drag to rotate 360°</span>
+  <button id="spin" type="button" aria-label="Rotate the view all the way round">360°</button>
   <span id="count">01 / 23</span>
   <button id="prev" aria-label="Previous page">←</button><button id="next" aria-label="Next page">→</button>
 </div>
@@ -41,7 +42,8 @@ __CSS__
 __THREE__
 </script>
 <script>
-const XBOT_URL = 'data:model/gltf-binary;base64,__XBOT__';
+const MAN_URL = 'data:model/gltf-binary;base64,__MAN__';
+const WOMAN_URL = 'data:model/gltf-binary;base64,__WOMAN__';
 __CONTENT__
 __APP__
 </script>

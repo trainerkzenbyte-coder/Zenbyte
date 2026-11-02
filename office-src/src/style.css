@@ -82,6 +82,8 @@ body.office .ctrl{opacity:1}
 #count{font-size:.72rem;letter-spacing:.12em;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 .ctrl button{width:42px;height:42px;border-radius:50%;background:rgba(6,12,24,.8);border:1px solid var(--line);font-size:1rem}
 .ctrl button:disabled{opacity:.35}
+#spin{width:auto!important;padding:0 .9rem;font-size:.7rem!important;font-weight:700;letter-spacing:.08em}
+body.spin #spin{background:var(--gold);color:#0b1424;border-color:var(--gold)}
 
 @media (max-width:900px){
  #chap{display:none}

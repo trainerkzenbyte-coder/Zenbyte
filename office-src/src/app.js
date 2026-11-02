@@ -187,19 +187,42 @@ function glassWall(x, z, w, ry, parent) {
 /* ---------------- the office building ---------------- */
 const ZX = [0, 15, 30, 45, 60, 75, 90];     // centre of each zone along X
 const LEN = 110;
-const floor = new T.Mesh(new T.PlaneGeometry(LEN, 16), M.wood); floor.rotation.x = -Math.PI / 2; floor.position.set(45, 0, 0); floor.receiveShadow = true; scene.add(floor);
-const ceil = new T.Mesh(new T.PlaneGeometry(LEN, 16), M.ceil); ceil.rotation.x = Math.PI / 2; ceil.position.set(45, 3.2, 0); scene.add(ceil);
-for (let x = -8; x < 100; x += 3) for (let z = -4.5; z <= 4.5; z += 3) { const l = new T.Mesh(new T.PlaneGeometry(1.2, .6), M.lightPanel); l.rotation.x = Math.PI / 2; l.position.set(x, 3.19, z); scene.add(l); }
+const floor = new T.Mesh(new T.PlaneGeometry(LEN, 18), M.wood); floor.rotation.x = -Math.PI / 2; floor.position.set(45, 0, 2); floor.receiveShadow = true; scene.add(floor);
+const ceil = new T.Mesh(new T.PlaneGeometry(LEN, 18), M.ceil); ceil.rotation.x = Math.PI / 2; ceil.position.set(45, 3.2, 2); scene.add(ceil);
+for (let x = -8; x < 100; x += 3) for (let z = -4.5; z <= 9; z += 3) { const l = new T.Mesh(new T.PlaneGeometry(1.2, .6), M.lightPanel); l.rotation.x = Math.PI / 2; l.position.set(x, 3.19, z); scene.add(l); }
 /* back wall with big windows onto the city */
 const back = group(45, 0, -6);
 box(LEN, 3.2, .2, M.wall, 0, 1.6, -.1, back, false);
 const win = new T.Mesh(new T.PlaneGeometry(LEN - 2, 2.2), M.sky); win.position.set(0, 1.65, .02); back.add(win);
 for (let x = -LEN / 2; x <= LEN / 2; x += 2.4) box(.08, 2.3, .1, M.frame, x, 1.65, .05, back, false);
 box(LEN, .08, .12, M.frame, 0, .53, .05, back, false); box(LEN, .08, .12, M.frame, 0, 2.77, .05, back, false);
-/* side wall (behind the camera is open), partitions between zones */
-for (let i = 0; i < ZX.length - 1; i++) glassWall((ZX[i] + ZX[i + 1]) / 2, -2, 7.8, Math.PI / 2);
-const sun = new T.DirectionalLight(0xfff3e2, 2.6); sun.position.set(6, 10, -12); sun.castShadow = true;
-sun.shadow.mapSize.set(MOB() ? 1024 : 2048, MOB() ? 1024 : 2048); sun.shadow.camera.left = -11; sun.shadow.camera.right = 11; sun.shadow.camera.top = 9; sun.shadow.camera.bottom = -9; sun.shadow.camera.far = 40; sun.shadow.bias = -.0005; sun.shadow.normalBias = .02;
+/* front wall (the opposite side) with a big screen in every zone, and glass partitions between zones */
+const front = group(45, 0, 10.1);
+box(LEN, 3.2, .2, M.wall, 0, 1.6, .1, front, false);
+box(LEN, .5, .06, M.accent, 0, .25, -.02, front, false);
+for (let i = 0; i < ZX.length - 1; i++) glassWall((ZX[i] + ZX[i + 1]) / 2, 2, 16, Math.PI / 2);
+function slideTex(title, big, lines, foot) {
+  return tex(1280, 720, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#0f2b4d'); g.addColorStop(1, '#060f1f'); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    x.drawImage($('#logoImg'), w - 150, 40, 96, 98);
+    x.fillStyle = '#e8c27c'; x.font = '600 30px Inter, sans-serif'; x.fillText(title, 80, 100);
+    x.fillStyle = '#ffffff'; x.font = '500 84px Cormorant, Georgia, serif'; x.fillText(big, 80, 210);
+    lines.forEach((l, i) => { const y = 300 + i * 92; x.fillStyle = 'rgba(255,255,255,.07)'; x.fillRect(80, y, w - 160, 74); x.fillStyle = '#e8c27c'; x.fillRect(80, y, 6, 74); x.fillStyle = '#e6edf7'; x.font = '500 36px Inter, sans-serif'; x.fillText(l, 116, y + 49); });
+    if (foot) { x.fillStyle = '#8fb8e0'; x.font = '500 26px Inter, sans-serif'; x.fillText(foot, 80, h - 50); }
+  });
+}
+function frontScreen(zone, w, h, map, x = 0) {
+  const g = group(ZX[zone] + x, 1.7, 9.98, Math.PI);
+  box(w + .14, h + .14, .08, M.black, 0, 0, .02, g, false);
+  const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ map, toneMapped: false })); m.position.z = .07; g.add(m);
+  return g;
+}
+const callTex = tex(1280, 720, (x, w, h) => { x.fillStyle = '#0b0f17'; x.fillRect(0, 0, w, h); const names = ['Priya · Chennai', 'Arjun · Bengaluru', 'Client · Hiring team', 'Karthik · Coimbatore', 'Divya · HR', 'You'];
+  names.forEach((n, i) => { const cx = 20 + (i % 3) * 420, cy = 20 + Math.floor(i / 3) * 340; const g = x.createLinearGradient(cx, cy, cx, cy + 320); g.addColorStop(0, ['#2c3e57', '#3b2f2f', '#24413a', '#3a3550', '#45362a', '#2a3445'][i]); g.addColorStop(1, '#10141c'); x.fillStyle = g; x.fillRect(cx, cy, 400, 320);
+    x.fillStyle = 'rgba(255,255,255,.18)'; x.beginPath(); x.arc(cx + 200, cy + 135, 62, 0, 7); x.fill(); x.beginPath(); x.ellipse(cx + 200, cy + 300, 115, 90, 0, Math.PI, 0); x.fill();
+    x.fillStyle = 'rgba(0,0,0,.5)'; x.fillRect(cx + 12, cy + 274, 250, 34); x.fillStyle = '#fff'; x.font = '500 22px Inter, sans-serif'; x.fillText(n, cx + 22, cy + 298); }); });
+const sun = new T.DirectionalLight(0xfff3e2, 2.6); sun.position.set(6, 12, -10); sun.castShadow = true;
+sun.shadow.mapSize.set(MOB() ? 1024 : 2048, MOB() ? 1024 : 2048); sun.shadow.camera.left = -11; sun.shadow.camera.right = 11; sun.shadow.camera.top = 12; sun.shadow.camera.bottom = -12; sun.shadow.camera.far = 40; sun.shadow.bias = -.0005; sun.shadow.normalBias = .02;
 scene.add(sun); scene.add(sun.target);
 scene.add(new T.HemisphereLight(0xffffff, 0xb59a7c, .9));
 const fill = new T.DirectionalLight(0xdfe9ff, .6); fill.position.set(-4, 6, 10); scene.add(fill);
@@ -272,12 +295,103 @@ for (let i = 0; i < CONF; i++) cSeed.push([Math.random() * 8 - 4, Math.random() 
 cGeo.setAttribute('position', new T.BufferAttribute(cPos, 3));
 const confetti = new T.Points(cGeo, new T.PointsMaterial({ size: .06, color: 0xe8c27c })); Z7.add(confetti);
 
+/* the opposite side of every zone: a big screen people can watch */
+frontScreen(0, 4.2, 2.36, slideTex('WELCOME TO ZENBYTE', 'Your bridge to IT careers', ['MNCs · product companies · startups', 'Chennai · Coimbatore · Bengaluru', 'No offer, no fee'], 'Visitors: please check in at the reception'));
+const sofaF1 = group(ZX[0] - 1, 0, 6.6, Math.PI, null); box(2.4, .42, .85, M.sofa, 0, .21, 0, sofaF1); box(2.4, .5, .2, M.sofa, 0, .62, .35, sofaF1);
+frontScreen(1, 4.6, 2.6, slideTex('SKILLS WE PLACE FOR', 'In demand right now', ['Data Science · ML · Data Engineering', 'Java · Full Stack · Python · .NET', 'DevOps · Cloud · Testing · Salesforce'], 'Around 50 offers every month'));
+frontScreen(2, 4.6, 2.6, codeScreen(77).t);
+frontScreen(3, 4.4, 2.48, callTex);
+[[-1.2, 6.9], [0, 6.9], [1.2, 6.9]].forEach(([x, z]) => chair(Z4, x, z, 0));
+frontScreen(4, 3.8, 2.14, slideTex('HIRING NOW', 'Fresh openings this week', ['Java Developer · Chennai', 'Data Engineer · Bengaluru', 'QA Automation · Coimbatore'], 'Ask your counsellor to apply'));
+frontScreen(5, 3.8, 2.14, slideTex('THIS MONTH', 'Offer letters released', ['Day 1 to 45: usual time to place', 'Salary talks and counter offers', 'Joining support included'], 'Zenbyte Technologies'));
+frontScreen(6, 4.6, 2.6, slideTex('PLACED THIS MONTH', 'Congratulations, team!', ['Anitha · Data Analyst · MNC', 'Rahul · Java Developer · Product company', 'Meena · QA Engineer · Bank IT'], 'Refer friends and earn rewards'));
+
 /* ---------------- people ---------------- */
-const people = [], loader = new T.GLTFLoader();
-const OUTFITS = [[0x24324a, 0xd9d2c5], [0xe9e6df, 0x2a3140], [0x3a5f8a, 0xe2dccf], [0x2f2f33, 0xc8a27a], [0x8aa0b8, 0x30343c], [0x6b4f3a, 0xe9e2d6], [0x1f6f78, 0xddd6c9], [0xb7c3cf, 0x1e2a38]];
-const BONES = ['Hips', 'Spine', 'Spine1', 'Spine2', 'Neck', 'Head', 'LeftArm', 'LeftForeArm', 'LeftHand', 'RightArm', 'RightForeArm', 'RightHand', 'LeftUpLeg', 'LeftLeg', 'LeftFoot', 'RightUpLeg', 'RightLeg', 'RightFoot', 'LeftHandMiddle1', 'RightHandMiddle1'];
+/* Two realistic base people (a man and a woman), dressed in many different
+   IT-office outfits: T-shirts and jeans, shirts, hoodies, kurtis and suits. */
+const people = [], loader = new T.GLTFLoader(), MODELS = {};
+const SKIN = [0xd9b49a, 0xc79c7e, 0xb98a6a, 0xe6c3a8, 0xa87b5e, 0xcfa587];
+const HAIR = [0x2a1d16, 0x1b1411, 0x3b2a1f, 0x120e0c, 0x4a3324];
+const OUTFITS = [
+  { sex: 'm', top: 0x24324a, bot: 0x24324a, shoe: 0x1a1a1a, look: 'suit' },
+  { sex: 'f', top: 0xf2f2f0, bot: 0x3d6ea8, shoe: 0x2a2a2a },
+  { sex: 'm', top: 0xe9eef5, bot: 0x2f3a4a, shoe: 0x3b2a20 },
+  { sex: 'f', top: 0xb5404f, bot: 0x22324a, shoe: 0x3a2a22 },
+  { sex: 'm', top: 0x2f5d4a, bot: 0x3a5f8f, shoe: 0xeeeeee },
+  { sex: 'f', top: 0x1d1f24, bot: 0x4a6f9c, shoe: 0x1a1a1a },
+  { sex: 'm', top: 0x8fb6dd, bot: 0xb59c74, shoe: 0x5a3b26 },
+  { sex: 'f', top: 0x2b2f3a, bot: 0x2b2f3a, shoe: 0x111111, look: 'suit' },
+  { sex: 'm', top: 0x7a1f2b, bot: 0x2a3d5c, shoe: 0xf2f2f2 },
+  { sex: 'm', top: 0x39424f, bot: 0x39424f, shoe: 0x161616, look: 'suit' },
+  { sex: 'f', top: 0x2f7d77, bot: 0x30343c, shoe: 0x4a3426 },
+  { sex: 'm', top: 0xf4f4f2, bot: 0x2d4f7c, shoe: 0xffffff },
+  { sex: 'f', top: 0xd8a9b8, bot: 0x3d5f8f, shoe: 0x2a2a2a },
+  { sex: 'm', top: 0x3b4450, bot: 0x2d4f7c, shoe: 0xe8e8e8 }
+];
+/* grey copy of a texture so any colour can be applied to it */
+const greyCache = new Map();
+function grey(map, lift = 1.15) {
+  if (!map || !map.image) return null; if (greyCache.has(map)) return greyCache.get(map);
+  const im = map.image, c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+  const d = x.getImageData(0, 0, c.width, c.height), a = d.data; let sum = 0, n = 0;
+  for (let i = 0; i < a.length; i += 4) { const l = .3 * a[i] + .59 * a[i + 1] + .11 * a[i + 2]; a[i] = l; if (a[i + 3] > 20) { sum += l; n++; } }
+  const k = Math.min(3, 205 / Math.max(1, sum / Math.max(1, n))) * lift;
+  for (let i = 0; i < a.length; i += 4) { const l = Math.min(255, a[i] * k); a[i] = a[i + 1] = a[i + 2] = l; }
+  x.putImageData(d, 0, 0); const t = new T.CanvasTexture(c); t.flipY = map.flipY; t.colorSpace = T.SRGBColorSpace; t.wrapS = map.wrapS; t.wrapT = map.wrapT; t.anisotropy = 4;
+  greyCache.set(map, t); return t;
+}
+const _c = new T.Color(), _v = new T.Vector3();
+function tint(mat, hex, map) { const m = mat.clone(); if (map !== undefined) m.map = map; m.color.setHex(hex); m.metalness = 0; m.roughness = Math.max(.55, m.roughness || .7); return m; }
+function dress(root, o, k) {
+  const skin = SKIN[(k * 5 + 2) % SKIN.length], hair = HAIR[k % HAIR.length];
+  root.updateMatrixWorld(true);
+  root.traverse(n => {
+    if (!n.isMesh) return;
+    n.castShadow = true; n.receiveShadow = true; n.frustumCulled = false;
+    const mats = Array.isArray(n.material) ? n.material : [n.material];
+    const nm = (n.name + ' ' + mats.map(m => m.name).join(' ')).toLowerCase();
+    let m = mats[0];
+    if (/outfit_top/.test(nm)) {
+      m = tint(m, o.top, grey(m.map));
+      /* remove the bead necklace: fold its vertices into the chest */
+      const g = n.geometry = n.geometry.clone(), pos = g.attributes.position, inv = new T.Matrix4().copy(n.matrixWorld).invert();
+      const neck = root.getObjectByName('Neck').getWorldPosition(new T.Vector3()), chest = root.getObjectByName('Spine2').getWorldPosition(new T.Vector3());
+      for (let i = 0; i < pos.count; i++) { _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (_v.y > neck.y - .035 * root.scale.y / .01 * .01 && Math.hypot(_v.x - neck.x, _v.z - neck.z) < .2 * root.scale.y / (MODELS.m.scale || 1)) { _v.copy(chest).applyMatrix4(inv); pos.setXYZ(i, _v.x, _v.y, _v.z); } }
+    }
+    else if (/outfit_bottom/.test(nm)) m = tint(m, o.bot, grey(m.map));
+    else if (/footwear/.test(nm)) m = tint(m, o.shoe, grey(m.map, 1));
+    else if (/hair|ponytail|eyebrow/.test(nm)) {
+      m = tint(m, hair, grey(m.map, .9));
+      if (/wolf3d_hair/.test(nm)) {                         /* a shorter, office-style haircut for the men */
+        const g = n.geometry = n.geometry.clone(), pos = g.attributes.position, inv = new T.Matrix4().copy(n.matrixWorld).invert();
+        const hy = root.getObjectByName('Head').getWorldPosition(new T.Vector3()).y, top = root.getObjectByName('HeadTop_End').getWorldPosition(new T.Vector3()).y, cut = hy + (top - hy) * .3;
+        for (let i = 0; i < pos.count; i++) { _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (_v.y < cut) { _v.y = cut; _v.applyMatrix4(inv); pos.setXYZ(i, _v.x, _v.y, _v.z); } }
+      }
+    }
+    else if (/casualsuit/.test(nm)) {
+      /* one mesh for top + jeans: colour by height (vertex colours) on a grey copy */
+      const g = n.geometry = n.geometry.clone(), pos = g.attributes.position, col = new Float32Array(pos.count * 3);
+      const hips = root.getObjectByName('Hips').getWorldPosition(new T.Vector3()).y / root.scale.y;
+      for (let i = 0; i < pos.count; i++) {
+        _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); const y = _v.y / root.scale.y;
+        _c.setHex(y > hips + .07 ? o.top : o.bot).convertSRGBToLinear(); col[i * 3] = _c.r; col[i * 3 + 1] = _c.g; col[i * 3 + 2] = _c.b;
+      }
+      g.setAttribute('color', new T.BufferAttribute(col, 3));
+      m = tint(m, 0xffffff, grey(m.map)); m.vertexColors = true;
+    }
+    else if (/skin|body|^base| base/.test(nm)) {
+      m = m.clone(); m.color.setHex(skin);
+      if (o.sex === 'f' && /base|body/.test(nm)) {                       /* shoes on bare feet: darken below the ankle */
+        const g = n.geometry = n.geometry.clone(), pos = g.attributes.position, col = new Float32Array(pos.count * 3);
+        for (let i = 0; i < pos.count; i++) { _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); const y = _v.y / root.scale.y; _c.setHex(y < .085 ? o.shoe : 0xffffff).convertSRGBToLinear(); col.set([_c.r, _c.g, _c.b], i * 3); }
+        g.setAttribute('color', new T.BufferAttribute(col, 3)); m.vertexColors = true;
+      }
+    }
+    n.material = m;
+  });
+}
 const _a = new T.Vector3(), _b = new T.Vector3(), _q = new T.Quaternion(), _q2 = new T.Quaternion(), _q3 = new T.Quaternion(), _d = new T.Vector3();
-/* point a bone (towards its child) in a direction given in the person's own space */
+/* point a bone (towards its child) in a direction given in the person's own space: works for any skeleton */
 function aim(p, name, child, dir, w = 1) {
   const bone = p.b[name], ch = p.b[child]; if (!bone || !ch) return;
   bone.updateWorldMatrix(true, false); ch.updateWorldMatrix(false, false);
@@ -289,105 +403,108 @@ function aim(p, name, child, dir, w = 1) {
   bone.parent.getWorldQuaternion(_q3); _q3.invert().multiply(_q);
   bone.quaternion.slerp(_q3, w); bone.updateMatrixWorld(true);
 }
-function spawn(gltf, zone, x, z, ry, mode, opts = {}) {
-  const root = T.SkeletonUtils.clone(gltf.scene);
-  const o = OUTFITS[people.length % OUTFITS.length];
-  root.traverse(n => {
-    if (n.isMesh) {
-      n.castShadow = true; n.receiveShadow = true; n.frustumCulled = false;
-      n.material = n.material.clone();
-      if (/Joints/.test(n.material.name)) { n.material.color.setHex(o[1]); n.material.roughness = .5; n.material.metalness = .2; }
-      else { n.material.color.setHex(o[0]); n.material.roughness = .55; n.material.metalness = .05; }
-    }
-  });
-  const holder = group(ZX[zone] + x, 0, z, ry);
-  holder.add(root); root.scale.setScalar(opts.s || 1.08);
-  const mixer = new T.AnimationMixer(root);
-  const clip = n => gltf.animations.find(a => a.name === n);
-  const idle = mixer.clipAction(clip('idle')), walk = mixer.clipAction(clip('walk'));
-  idle.play(); walk.play(); walk.setEffectiveWeight(0);
-  idle.time = Math.random() * 3; walk.time = Math.random();
-  const b = {}; BONES.forEach(n => b[n] = root.getObjectByName('mixamorig' + n));
-  const p = { root: holder, model: root, mixer, idle, walk, b, mode, opts, phase: Math.random() * 10, zone };
-  if (mode === 'coffee') { const cup = cyl(.045, .038, .11, M.cup, 0, 0, 0, null); p.cup = cup; }
+const BONES = ['Hips', 'Spine', 'Spine1', 'Spine2', 'Neck', 'Head', 'LeftShoulder', 'RightShoulder', 'LeftArm', 'LeftForeArm', 'LeftHand', 'RightArm', 'RightForeArm', 'RightHand', 'LeftUpLeg', 'LeftLeg', 'LeftFoot', 'LeftToeBase', 'RightUpLeg', 'RightLeg', 'RightFoot', 'RightToeBase', 'LeftHandMiddle1', 'RightHandMiddle1'];
+function spawn(zone, x, z, ry, mode, opts = {}) {
+  const k = people.length, o = OUTFITS[opts.outfit !== undefined ? opts.outfit : k % OUTFITS.length];
+  const base = MODELS[o.sex]; if (!base) return null;
+  const root = T.SkeletonUtils.clone(base.scene);
+  const rel = o.sex === 'm' ? 1.04 + (k % 3) * .015 : .98 + (k % 2) * .02; root.scale.setScalar(base.scale * rel);
+  dress(root, o, k);
+  const holder = group(ZX[zone] + x, 0, z, ry); holder.add(root);
+  const b = {}; BONES.forEach(n => b[n] = root.getObjectByName(n));
+  const rest = {}; BONES.forEach(n => { if (b[n]) rest[n] = b[n].quaternion.clone(); });
+  const p = { root: holder, model: root, b, rest, mode, opts, phase: Math.random() * 10, zone, hipY: b.Hips.position.y, rel };
+  if (mode === 'coffee') p.cup = cyl(.045, .038, .11, M.cup, 0, 0, 0, null);
   people.push(p); return p;
 }
-function seatHeight(p) { return -.43 * (p.opts.s || 1.08); }
+const L = (x, y, z) => _d.set(x, y, z).clone();
 function pose(p, t) {
-  const L = V3, ph = t + p.phase, m = p.mode;
+  const ph = t + p.phase, m = p.mode;
+  BONES.forEach(n => { if (p.rest[n]) p.b[n].quaternion.copy(p.rest[n]); });
+  p.b.Hips.position.y = p.hipY; p.model.position.y = 0;
+  p.model.updateMatrixWorld(true);
+  const breathe = Math.sin(ph * 1.6) * .012;
+  /* standing base pose */
+  let walkK = 0;
   if (m === 'walk') {
     const path = p.opts.path, sp = p.opts.speed || .9, len = p.opts.len;
-    const d = ((t * sp + p.phase * 3) % len + len) % len;
-    // walk back and forth along a straight line
-    const half = len / 2, fwd = d < half, u = fwd ? d / half : 2 - d / half;
+    const d = ((t * sp + p.phase * 3) % len + len) % len, half = len / 2, fwd = d < half, u = fwd ? d / half : 2 - d / half;
     const a = path[0], c = path[1];
     p.root.position.set(ZX[p.zone] + a[0] + (c[0] - a[0]) * u, 0, a[1] + (c[1] - a[1]) * u);
-    const ang = Math.atan2(c[0] - a[0], c[1] - a[1]) + (fwd ? 0 : Math.PI);
-    p.root.rotation.y = ang;
-    p.walk.setEffectiveWeight(1); p.idle.setEffectiveWeight(0);
-    return;
+    p.root.rotation.y = Math.atan2(c[0] - a[0], c[1] - a[1]) + (fwd ? 0 : Math.PI);
+    p.root.updateMatrixWorld(true); walkK = 1;
   }
-  p.walk.setEffectiveWeight(0); p.idle.setEffectiveWeight(1);
-  const R = p.opts.right === undefined ? 1 : p.opts.right;
+  const cyc = ph * 5.2 * (p.opts.speed || .9);
+  const sw = walkK ? Math.sin(cyc) : 0;
+  aim(p, 'Spine', 'Spine2', L(0, 1, .02 + breathe));
+  if (m !== 'type' && m !== 'sitMeet' && m !== 'sitTalk') {
+    const lA = sw * .42, rA = -sw * .42;
+    const lK = walkK ? Math.max(0, -Math.sin(cyc - .9)) * .75 : 0, rK = walkK ? Math.max(0, Math.sin(cyc - .9)) * .75 : 0;
+    aim(p, 'LeftUpLeg', 'LeftLeg', L(.04, -Math.cos(lA), Math.sin(lA))); aim(p, 'RightUpLeg', 'RightLeg', L(-.04, -Math.cos(rA), Math.sin(rA)));
+    aim(p, 'LeftLeg', 'LeftFoot', L(0, -Math.cos(lA - lK), Math.sin(lA - lK))); aim(p, 'RightLeg', 'RightFoot', L(0, -Math.cos(rA - rK), Math.sin(rA - rK)));
+    aim(p, 'LeftFoot', 'LeftToeBase', L(0, -.45, 1)); aim(p, 'RightFoot', 'RightToeBase', L(0, -.45, 1));
+    if (walkK) p.b.Hips.position.y = p.hipY * (1 + Math.abs(Math.cos(cyc)) * .02);
+    /* arms hang down and swing a little */
+    aim(p, 'LeftArm', 'LeftForeArm', L(.12, -1, -sw * .35)); aim(p, 'RightArm', 'RightForeArm', L(-.12, -1, sw * .35));
+    aim(p, 'LeftForeArm', 'LeftHand', L(.04, -1, .18 - sw * .25)); aim(p, 'RightForeArm', 'RightHand', L(-.04, -1, .18 + sw * .25));
+  }
+  if (m === 'walk') { aim(p, 'Neck', 'Head', L(0, 1, .06)); return; }
   if (m === 'type' || m === 'sitTalk' || m === 'sitMeet') {
-    p.model.position.y = seatHeight(p);
-    aim(p, 'LeftUpLeg', 'LeftLeg', L(.12, -.05, 1)); aim(p, 'RightUpLeg', 'RightLeg', L(-.12, -.05, 1));
-    aim(p, 'LeftLeg', 'LeftFoot', L(.04, -1, .12)); aim(p, 'RightLeg', 'RightFoot', L(-.04, -1, .12));
-    aim(p, 'Spine', 'Spine2', L(0, 1, m === 'type' ? .2 : .08));
+    p.model.position.y = -.46 * p.rel;
+    aim(p, 'LeftUpLeg', 'LeftLeg', L(.1, -.06, 1)); aim(p, 'RightUpLeg', 'RightLeg', L(-.1, -.06, 1));
+    aim(p, 'LeftLeg', 'LeftFoot', L(.03, -1, .1)); aim(p, 'RightLeg', 'RightFoot', L(-.03, -1, .1));
+    aim(p, 'LeftFoot', 'LeftToeBase', L(0, -.3, 1)); aim(p, 'RightFoot', 'RightToeBase', L(0, -.3, 1));
+    aim(p, 'Spine', 'Spine2', L(0, 1, m === 'type' ? .18 : .06));
     if (m === 'type') {
-      const k1 = Math.sin(ph * 15) * .07, k2 = Math.sin(ph * 13 + 1.3) * .07;
-      aim(p, 'LeftArm', 'LeftForeArm', L(.28, -.8, .5)); aim(p, 'RightArm', 'RightForeArm', L(-.28, -.8, .5));
-      aim(p, 'LeftForeArm', 'LeftHand', L(-.25, -.12 + k1, 1)); aim(p, 'RightForeArm', 'RightHand', L(.25, -.12 + k2, 1));
-      aim(p, 'Neck', 'Head', L(Math.sin(ph * .4) * .15, 1, .25));
+      const k1 = Math.sin(ph * 15) * .06, k2 = Math.sin(ph * 13 + 1.3) * .06;
+      aim(p, 'LeftArm', 'LeftForeArm', L(.22, -.85, .42)); aim(p, 'RightArm', 'RightForeArm', L(-.22, -.85, .42));
+      aim(p, 'LeftForeArm', 'LeftHand', L(-.2, -.1 + k1, 1)); aim(p, 'RightForeArm', 'RightHand', L(.2, -.1 + k2, 1));
+      aim(p, 'Neck', 'Head', L(Math.sin(ph * .4) * .12, 1, .22));
     } else {
-      aim(p, 'LeftArm', 'LeftForeArm', L(.25, -.85, .4)); aim(p, 'RightArm', 'RightForeArm', L(-.25, -.85, .4));
       const g = m === 'sitTalk' ? Math.max(0, Math.sin(ph * 1.3)) * .5 : 0;
-      aim(p, 'LeftForeArm', 'LeftHand', L(-.3, -.1, 1)); aim(p, 'RightForeArm', 'RightHand', L(.2, -.1 + g, 1));
-      aim(p, 'Neck', 'Head', L(Math.sin(ph * .7) * .25, 1, .05));
+      aim(p, 'LeftArm', 'LeftForeArm', L(.2, -.88, .35)); aim(p, 'RightArm', 'RightForeArm', L(-.2, -.88, .35));
+      aim(p, 'LeftForeArm', 'LeftHand', L(-.3, -.15, 1)); aim(p, 'RightForeArm', 'RightHand', L(.25, -.15 + g, 1));
+      aim(p, 'Neck', 'Head', L(Math.sin(ph * .7) * .22, 1, .05));
     }
     return;
   }
-  p.model.position.y = 0;
+  const R = p.opts.right === undefined ? 1 : p.opts.right;
   if (m === 'shake') {
-    const shaking = (ph % 6) < 2.6, s = shaking ? Math.sin(ph * 11) * .12 : 0;
-    aim(p, 'RightArm', 'RightForeArm', L(-.12, -.85, .5)); aim(p, 'RightForeArm', 'RightHand', L(-.1, .05 + s, 1));
-    aim(p, 'Neck', 'Head', L(0, 1, .08 + (shaking ? Math.sin(ph * 3) * .05 : 0)));
+    const shaking = (ph % 6) < 2.6, s = shaking ? Math.sin(ph * 11) * .1 : 0;
+    aim(p, 'RightArm', 'RightForeArm', L(-.1, -.85, .45)); aim(p, 'RightForeArm', 'RightHand', L(-.12, .02 + s, 1));
+    aim(p, 'Neck', 'Head', L(0, 1, .1));
   } else if (m === 'coffee') {
     const sip = Math.max(0, Math.sin(ph * .7)) ** 6;
-    aim(p, 'LeftArm', 'LeftForeArm', L(.18, -.95, .25 + sip * .2)); aim(p, 'LeftForeArm', 'LeftHand', L(-.35, .55 + sip * .9, .75 - sip * .3));
+    aim(p, 'LeftArm', 'LeftForeArm', L(.16, -.95, .2 + sip * .2)); aim(p, 'LeftForeArm', 'LeftHand', L(-.4, .5 + sip * .9, .75 - sip * .3));
     const g = Math.max(0, Math.sin(ph * 1.6 + 1)) * .45;
-    aim(p, 'RightArm', 'RightForeArm', L(-.2, -.95, .15 + g * .3)); aim(p, 'RightForeArm', 'RightHand', L(.25, -.4 + g, .8));
-    aim(p, 'Neck', 'Head', L(Math.sin(ph * .8) * .2, 1, .05 - sip * .2));
-    if (p.cup) { p.b.LeftHand.updateWorldMatrix(true, false); p.b.LeftHand.getWorldPosition(_a); p.cup.position.copy(_a); p.cup.position.y -= .02; }
+    aim(p, 'RightArm', 'RightForeArm', L(-.16, -.95, .12 + g * .3)); aim(p, 'RightForeArm', 'RightHand', L(.25, -.45 + g, .8));
+    aim(p, 'Neck', 'Head', L(Math.sin(ph * .8) * .18, 1, .05 - sip * .15));
+    if (p.cup) { p.b.LeftHand.updateWorldMatrix(true, false); p.b.LeftHand.getWorldPosition(_a); p.cup.position.copy(_a); p.cup.position.y += .02; }
   } else if (m === 'talk') {
     const g1 = Math.max(0, Math.sin(ph * 1.7)) * .6, g2 = Math.max(0, Math.sin(ph * 1.3 + 2)) * .5;
-    aim(p, 'RightArm', 'RightForeArm', L(-.25, -.9, .2 + g1 * .3)); aim(p, 'RightForeArm', 'RightHand', L(.15, -.3 + g1, .9));
-    aim(p, 'LeftArm', 'LeftForeArm', L(.25, -.9, .2 + g2 * .3)); aim(p, 'LeftForeArm', 'LeftHand', L(-.15, -.4 + g2, .9));
-    aim(p, 'Neck', 'Head', L(Math.sin(ph * .9) * .25, 1, .05));
+    aim(p, 'RightArm', 'RightForeArm', L(-.2, -.92, .15 + g1 * .3)); aim(p, 'RightForeArm', 'RightHand', L(.15, -.35 + g1, .9));
+    aim(p, 'LeftArm', 'LeftForeArm', L(.2, -.92, .15 + g2 * .3)); aim(p, 'LeftForeArm', 'LeftHand', L(-.15, -.45 + g2, .9));
+    aim(p, 'Neck', 'Head', L(Math.sin(ph * .9) * .22, 1, .05));
   } else if (m === 'present') {
-    const g = Math.sin(ph * 1.1) * .15;
+    const g = Math.sin(ph * 1.1) * .12;
     aim(p, 'RightArm', 'RightForeArm', L(-.85 * R, .05 + g, .45)); aim(p, 'RightForeArm', 'RightHand', L(-.9 * R, .15 + g, .4));
-    aim(p, 'LeftArm', 'LeftForeArm', L(.2, -.9, .25)); aim(p, 'LeftForeArm', 'LeftHand', L(-.2, -.2 + Math.max(0, Math.sin(ph * 1.5)) * .4, .9));
-    aim(p, 'Neck', 'Head', L(-.35 * R + Math.sin(ph * .5) * .3, 1, .05));
+    aim(p, 'LeftArm', 'LeftForeArm', L(.18, -.9, .22)); aim(p, 'LeftForeArm', 'LeftHand', L(-.2, -.2 + Math.max(0, Math.sin(ph * 1.5)) * .4, .9));
+    aim(p, 'Neck', 'Head', L(-.3 * R + Math.sin(ph * .5) * .25, 1, .05));
   } else if (m === 'clap') {
-    const c = Math.sin(ph * 12) * .14;
-    aim(p, 'LeftArm', 'LeftForeArm', L(.25, -.75, .55)); aim(p, 'RightArm', 'RightForeArm', L(-.25, -.75, .55));
+    const c = Math.sin(ph * 12) * .12;
+    aim(p, 'LeftArm', 'LeftForeArm', L(.22, -.78, .5)); aim(p, 'RightArm', 'RightForeArm', L(-.22, -.78, .5));
     aim(p, 'LeftForeArm', 'LeftHand', L(-.6 - c, .45, .7)); aim(p, 'RightForeArm', 'RightHand', L(.6 + c, .45, .7));
-  } else if (m === 'look') {
-    aim(p, 'Neck', 'Head', L(Math.sin(ph * .4) * .2, 1, .25));
+  } else if (m === 'watch') {
+    aim(p, 'Neck', 'Head', L(Math.sin(ph * .3) * .1, 1, -.02));
+    if (p.opts.arms === 'cross') { aim(p, 'LeftArm', 'LeftForeArm', L(.18, -.9, .3)); aim(p, 'RightArm', 'RightForeArm', L(-.18, -.9, .3)); aim(p, 'LeftForeArm', 'LeftHand', L(-1, .35, .35)); aim(p, 'RightForeArm', 'RightHand', L(1, .25, .4)); }
+  } else {
+    aim(p, 'Neck', 'Head', L(Math.sin(ph * .4) * .2, 1, .2));
   }
 }
 
 /* ---------------- story: camera view for every chapter ---------------- */
-const VIEWS = [
-  { cam: [3.6, 1.75, 6.6], at: [-.2, 1.25, -2.6] },   // reception
-  { cam: [-2.2, 1.8, 5.2], at: [.4, 1.55, -4] },       // data wall
-  { cam: [4.6, 2.4, 4.8], at: [-.4, .95, -2.2] },      // coding floor
-  { cam: [3.4, 1.7, 4.8], at: [0, 1.15, -3.2] },       // meeting room
-  { cam: [-3.4, 1.7, 4.4], at: [.2, 1.25, -2.6] },     // coffee break
-  { cam: [2.8, 1.65, 3.6], at: [-.2, 1.1, -3.2] },     // manager cabin
-  { cam: [0, 1.7, 5.6], at: [0, 1.4, -3] }             // celebration
-];
+/* each zone: where the camera stands and where it looks first; drag turns it all the way round (360°) */
+const VIEWS = [{ x: .9, at: [-.2, -2.6] }, { x: -.7, at: [.4, -4] }, { x: 1.3, at: [-.4, -2.2] }, { x: .9, at: [0, -3.2] }, { x: -.9, at: [.2, -2.6] }, { x: .7, at: [-.2, -3.2] }, { x: 0, at: [0, -3] }];
 const ZONE_NAME = ['Reception', 'Data wall', 'Coding floor', 'Meeting room', 'Coffee break', 'Manager cabin', 'Celebration'];
 
 /* ---------------- page UI ---------------- */
@@ -435,69 +552,78 @@ addEventListener('keydown', e => {
 });
 
 /* ---------------- camera: fly between zones, drag / mouse to look around ---------------- */
-const cam = { from: null, to: null, t0: 0, dur: 1, pos: V3(3.6, 1.75, 6.6), at: V3(-.2, 1.25, -2.6) };
-let yaw = 0, pitch = 0, yawT = 0, pitchT = 0, hoverX = 0, hoverY = 0, dragging = false, lx = 0, ly = 0, now = 0;
+const cam = { from: null, to: null, t0: 0, dur: 1, pos: V3(2.6, 1.7, 4.2), yaw0: 0 };
+let yaw = 0, pitch = 0, yawT = 0, pitchT = 0, hoverX = 0, hoverY = 0, dragging = false, lx = 0, ly = 0, now = 0, auto = false, dbg = null;
 function viewOf(z, j) {
-  const v = VIEWS[z], o = V3(ZX[z], 0, 0);
-  const pos = V3(...v.cam).add(o), at = V3(...v.at).add(o);
-  if (j > 0) { const s = (j % 2 ? 1 : -1) * Math.min(1.6, .55 * j); pos.x += s; pos.z -= .25 * j; }
-  if (MOB()) { pos.sub(at).multiplyScalar(1.28).add(at); at.y -= .15; }
-  return { pos, at };
+  const v = VIEWS[z], px = ZX[z] + v.x + (j > 0 ? (j % 2 ? 1 : -1) * Math.min(1.4, .5 * j) : 0), pz = MOB() ? 4.9 : 4.2;
+  return { pos: V3(px, 1.7, pz), yaw0: Math.atan2(-(ZX[z] + v.at[0] - px), -(v.at[1] - pz)) };
 }
 function flyTo(z, j) {
   const v = viewOf(z, j);
   const far = Math.abs(v.pos.x - cam.pos.x) > 6;
-  cam.from = { pos: cam.pos.clone(), at: cam.at.clone() }; cam.to = v; cam.t0 = now; cam.dur = far ? 2.4 : 1.2; cam.far = far;
-  yawT = 0; pitchT = 0;
-  sun.position.set(ZX[z] + 6, 10, -12); sun.target.position.set(ZX[z], 0, -1);
+  const start = cam.yaw0 + yaw; yaw = 0; yawT = 0; pitchT = 0;
+  let d = (v.yaw0 - start) % (Math.PI * 2); if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2;
+  cam.from = { pos: cam.pos.clone(), yaw0: start }; cam.to = { pos: v.pos, yaw0: start + d };
+  cam.t0 = now; cam.dur = far ? 2.4 : 1.2; cam.far = far;
+  sun.position.set(ZX[z] + 6, 12, -10); sun.target.position.set(ZX[z], 0, 2);
 }
 canvas.addEventListener('pointerdown', e => { dragging = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId); });
 canvas.addEventListener('pointermove', e => {
   hoverX = e.clientX / innerWidth - .5; hoverY = e.clientY / innerHeight - .5;
   if (!dragging) return;
-  yawT = clamp(yawT - (e.clientX - lx) * .006, -1.3, 1.3); pitchT = clamp(pitchT + (e.clientY - ly) * .004, -.35, .5);
+  yawT += (e.clientX - lx) * .006; pitchT = clamp(pitchT - (e.clientY - ly) * .003, -.25, .3); auto = false; document.body.classList.remove('spin');
   lx = e.clientX; ly = e.clientY;
 });
 canvas.addEventListener('pointerup', () => { dragging = false; });
-canvas.addEventListener('dblclick', () => { yawT = 0; pitchT = 0; });
+canvas.addEventListener('dblclick', () => { yawT = Math.round(yaw / (Math.PI * 2)) * Math.PI * 2; pitchT = 0; });
+$('#spin').addEventListener('click', () => { auto = !auto; document.body.classList.toggle('spin', auto); });
 
 /* ---------------- loading the people ---------------- */
 const status = $('#loadTxt');
+function loadModel(url) { return new Promise((res, rej) => loader.load(url, res, ev => { if (ev.total) status.textContent = 'Loading the office · ' + Math.round(ev.loaded / ev.total * 100) + '%'; }, rej)); }
+function prep(g) {
+  g.scene.updateMatrixWorld(true); const hips = g.scene.getObjectByName('Hips'); g.scale = 1;
+  const y = hips.getWorldPosition(new T.Vector3()).y; g.scale = .98 / y;   // hips at about 0.98 m
+  return g;
+}
 function loadPeople() {
-  return new Promise(res => {
-    loader.load(XBOT_URL, gltf => {
-      gltf.animations.forEach(c => { c.tracks = c.tracks.filter(tr => !/Hips\.position/.test(tr.name) || c.name === 'idle'); });
-      const ip = gltf.animations.find(a => a.name === 'idle'); ip.tracks.forEach(tr => { if (/Hips\.position/.test(tr.name)) { const v = tr.values; for (let i = 0; i < v.length; i += 3) { v[i] = 0; v[i + 2] = 0; } } });
-      /* reception: welcome + handshake + visitors walking in */
-      spawn(gltf, 0, -.3, -4.1, 0, 'look');
-      spawn(gltf, 0, -.48, -.4, Math.PI / 2, 'shake'); spawn(gltf, 0, .48, -.4, -Math.PI / 2, 'shake');
-      spawn(gltf, 0, 0, 0, 0, 'walk', { path: [[-5.4, .9], [1.6, .6]], len: 14, speed: .75 });
-      spawn(gltf, 0, 0, 0, 0, 'walk', { path: [[-5.6, -2.4], [-2.4, 1.2]], len: 9.6, speed: .7 });
-      /* data wall: presenter and team */
-      spawn(gltf, 1, -1.6, -4.2, .25, 'present', { right: -1 });
-      spawn(gltf, 1, -.3, -1.6, Math.PI, 'look'); spawn(gltf, 1, .7, -1.3, Math.PI + .2, 'coffee'); spawn(gltf, 1, 1.6, -2, Math.PI + .5, 'talk');
-      spawn(gltf, 1, -3.6, -1.18, Math.PI + .3, 'type');
-      /* coding floor: developers typing, a lead walking the floor */
-      deskSpots.forEach(([x, z], k) => spawn(gltf, 2, x, z + .62, Math.PI, 'type'));
-      spawn(gltf, 2, 0, 0, 0, 'walk', { path: [[-5, -.3], [5, -.3]], len: 20, speed: .8 });
-      spawn(gltf, 2, 4.9, -3.1, -Math.PI / 2, 'talk');
-      /* meeting room */
-      [[-1.4, -3.35, 0], [0, -3.4, 0], [1.4, -3.35, 0], [-1.4, -1.85, Math.PI], [1.4, -1.85, Math.PI]].forEach(([x, z, r]) => { chair(Z4, x, z + (r ? .2 : -.2), r ? Math.PI : 0); spawn(gltf, 3, x, z, r ? 0 : Math.PI, 'sitMeet'); });
-      spawn(gltf, 3, 2.6, -4.6, -.6, 'present', { right: 1 });
-      /* coffee break */
-      spawn(gltf, 4, -3.2, -4.1, 0, 'coffee'); spawn(gltf, 4, -2.4, -3.2, Math.PI * .85, 'talk');
-      spawn(gltf, 4, 2.1, -2.1, Math.PI * .3, 'coffee'); spawn(gltf, 4, 3.1, -2.2, -Math.PI * .4, 'coffee');
-      spawn(gltf, 4, 2.6, -1.4, Math.PI * 1.02, 'talk');
-      spawn(gltf, 4, 0, 0, 0, 'walk', { path: [[-4.6, .6], [4.2, 1.0]], len: 18, speed: .8 });
-      /* manager cabin */
-      spawn(gltf, 5, 0, -4.15, 0, 'sitTalk'); spawn(gltf, 5, -.6, -2.42, Math.PI, 'sitTalk'); spawn(gltf, 5, .6, -2.42, Math.PI, 'sitMeet');
-      /* celebration: offer handshake, team clapping */
-      spawn(gltf, 6, -.48, -2.4, Math.PI / 2, 'shake'); spawn(gltf, 6, .48, -2.4, -Math.PI / 2, 'shake');
-      [[-2.3, -2.9, .5], [2.3, -2.9, -.5], [-1.6, -1.2, .7], [1.6, -1.2, -.7], [0, -4.1, 0]].forEach(([x, z, r]) => spawn(gltf, 6, x, z, r, 'clap'));
-      people.forEach(p => { if (p.cup) scene.add(p.cup); });
-      res();
-    }, ev => { if (ev.total) status.textContent = 'Loading the office · ' + Math.round(ev.loaded / ev.total * 100) + '%'; }, err => { status.textContent = 'Could not load the people'; console.error(err); res(); });
-  });
+  return Promise.all([loadModel(MAN_URL), loadModel(WOMAN_URL)]).then(([man, woman]) => {
+    MODELS.m = prep(man); MODELS.f = prep(woman);
+    /* ---- reception: receptionist, a handshake, visitors; opposite side: visitors watching the welcome screen ---- */
+    spawn(0, -.3, -4.05, 0, 'look', { outfit: 1 });
+    spawn(0, -.47, -.4, Math.PI / 2, 'shake', { outfit: 0 }); spawn(0, .47, -.4, -Math.PI / 2, 'shake', { outfit: 4 });
+    spawn(0, 0, 0, 0, 'walk', { path: [[-5.4, 1.2], [1.6, .9]], len: 14, speed: .75, outfit: 3 });
+    spawn(0, -1.6, 6.55, 0, 'sitMeet', { outfit: 5 }); spawn(0, -.4, 6.55, 0, 'sitMeet', { outfit: 6 });
+    spawn(0, 1.6, 6.9, 0, 'watch', { outfit: 13, arms: 'cross' });
+    /* ---- data wall: presenter and team; opposite side: team reading the skills screen ---- */
+    spawn(1, -1.6, -4.2, .25, 'present', { right: -1, outfit: 9 });
+    spawn(1, -.3, -1.6, Math.PI, 'watch', { outfit: 12 }); spawn(1, .7, -1.3, Math.PI + .2, 'coffee', { outfit: 2 }); spawn(1, 1.6, -2, Math.PI + .5, 'talk', { outfit: 5 });
+    spawn(1, -3.6, -1.18, Math.PI + .3, 'type', { outfit: 8 });
+    spawn(1, -.8, 7.3, 0, 'watch', { outfit: 3, arms: 'cross' }); spawn(1, .5, 7.1, -.15, 'talk', { outfit: 11 }); spawn(1, 1.5, 7.4, -.3, 'watch', { outfit: 10 });
+    /* ---- coding floor: developers typing; opposite side: two devs reviewing code on the big screen ---- */
+    deskSpots.forEach(([x, z], k) => spawn(2, x, z + .62, Math.PI, 'type', { outfit: [11, 1, 4, 5, 8, 12][k] }));
+    spawn(2, 0, 0, 0, 'walk', { path: [[-5, -.3], [5, -.3]], len: 20, speed: .8, outfit: 9 });
+    spawn(2, -.7, 7.4, .2, 'present', { right: 1, outfit: 13 }); spawn(2, .6, 7.2, -.2, 'watch', { outfit: 10, arms: 'cross' });
+    /* ---- meeting room; opposite side: video call with the client ---- */
+    [[-1.4, -3.35, 0], [0, -3.4, 0], [1.4, -3.35, 0], [-1.4, -1.85, Math.PI], [1.4, -1.85, Math.PI]].forEach(([x, z, r], k) => { chair(Z4, x, z + (r ? .2 : -.2), r ? Math.PI : 0); spawn(3, x, z, r ? 0 : Math.PI, 'sitMeet', { outfit: [0, 3, 6, 7, 2][k] }); });
+    spawn(3, 2.6, -4.6, -.6, 'present', { right: 1, outfit: 9 });
+    spawn(3, -1.2, 6.75, 0, 'sitTalk', { outfit: 12 }); spawn(3, 0, 6.75, 0, 'sitMeet', { outfit: 4 }); spawn(3, 1.2, 6.75, 0, 'sitMeet', { outfit: 1 });
+    /* ---- coffee break; opposite side: watching the hiring news ---- */
+    spawn(4, -3.2, -4.1, 0, 'coffee', { outfit: 8 }); spawn(4, -2.4, -3.2, Math.PI * .85, 'talk', { outfit: 3 });
+    spawn(4, 2.1, -2.1, Math.PI * .3, 'coffee', { outfit: 5 }); spawn(4, 3.1, -2.2, -Math.PI * .4, 'coffee', { outfit: 11 });
+    spawn(4, 2.6, -1.4, Math.PI * 1.02, 'talk', { outfit: 12 });
+    spawn(4, 0, 0, 0, 'walk', { path: [[-4.6, .6], [4.2, 1.0]], len: 18, speed: .8, outfit: 6 });
+    spawn(4, -.6, 7.3, .1, 'coffee', { outfit: 13 }); spawn(4, .6, 7.4, -.1, 'watch', { outfit: 1, arms: 'cross' });
+    /* ---- manager cabin; opposite side: offer review ---- */
+    spawn(5, 0, -4.15, 0, 'sitTalk', { outfit: 0 }); spawn(5, -.6, -2.42, Math.PI, 'sitTalk', { outfit: 3 }); spawn(5, .6, -2.42, Math.PI, 'sitMeet', { outfit: 6 });
+    spawn(5, -.5, 7.3, .1, 'present', { right: 1, outfit: 7 }); spawn(5, .7, 7.1, -.2, 'watch', { outfit: 4 });
+    /* ---- celebration: offer handshake, team clapping; opposite side: everyone watching "Placed this month" ---- */
+    spawn(6, -.47, -2.4, Math.PI / 2, 'shake', { outfit: 9 }); spawn(6, .47, -2.4, -Math.PI / 2, 'shake', { outfit: 12 });
+    [[-2.3, -2.9, .5], [2.3, -2.9, -.5], [-1.6, -1.2, .7], [1.6, -1.2, -.7], [0, -4.1, 0]].forEach(([x, z, r], k) => spawn(6, x, z, r, 'clap', { outfit: [2, 5, 8, 10, 13][k] }));
+    [[-1.8, 7.2], [-.6, 7.4], [.6, 7.3], [1.8, 7.1]].forEach(([x, z], k) => spawn(6, x, z, 0, k % 2 ? 'clap' : 'watch', { outfit: [1, 4, 3, 11][k] }));
+    if (/lineup/.test(location.search)) OUTFITS.forEach((o, i) => spawn(0, -5.2 + i * .8, 3.2, Math.PI, 'look', { outfit: i }));
+    people.forEach(p => { if (p.cup) scene.add(p.cup); });
+  }).catch(err => { status.textContent = 'Could not load the people'; console.error(err); });
 }
 
 /* ---------------- main loop ---------------- */
@@ -513,17 +639,20 @@ function frame(t) {
   const dt = Math.min(.05, Math.max(0, t - last)); last = t; now = t;
   /* camera */
   if (cam.to) {
-    const u = clamp((t - cam.t0) / cam.dur), e = ease(u);
-    cam.pos.lerpVectors(cam.from.pos, cam.to.pos, e); cam.at.lerpVectors(cam.from.at, cam.to.at, e);
-    if (cam.far) cam.pos.y += Math.sin(u * Math.PI) * .6, cam.pos.z += Math.sin(u * Math.PI) * 1.5;
+    const u = clamp((t - cam.t0) / cam.dur), e = ease(u), f = cam.from, g = cam.to;
+    cam.pos.lerpVectors(f.pos, g.pos, e); cam.yaw0 = f.yaw0 + (g.yaw0 - f.yaw0) * e;
+    if (cam.far) cam.pos.y += Math.sin(u * Math.PI) * .4;
+    if (u >= 1) cam.to = null;
   }
-  yaw += (yawT + (dragging ? 0 : -hoverX * .25) - yaw) * .08; pitch += (pitchT + (dragging ? 0 : hoverY * .12) - pitch) * .08;
-  const off = tmpPos.copy(cam.pos).sub(cam.at), r = off.length();
-  const a0 = Math.atan2(off.x, off.z) + yaw, e0 = Math.asin(clamp(off.y / r, -1, 1)) + pitch;
-  camera.position.set(cam.at.x + Math.sin(a0) * Math.cos(e0) * r, Math.max(.4, cam.at.y + Math.sin(e0) * r), cam.at.z + Math.cos(a0) * Math.cos(e0) * r);
-  camera.lookAt(cam.at);
+  if (auto) yawT += dt * .25;
+  yaw += (yawT + (dragging || auto ? 0 : -hoverX * .35) - yaw) * .08; pitch += (pitchT + (dragging ? 0 : -hoverY * .12) - pitch) * .08;
+  const A = cam.yaw0 + yaw;
+  camera.position.copy(cam.pos);
+  tmpAt.set(cam.pos.x - Math.sin(A) * 5, cam.pos.y - .55 + pitch * 3, cam.pos.z - Math.cos(A) * 5);
+  if (dbg) { camera.position.copy(dbg[0]); tmpAt.copy(dbg[1]); }
+  camera.lookAt(tmpAt);
   /* people */
-  people.forEach(p => { p.mixer.update(dt); p.root.updateMatrixWorld(true); pose(p, t); });
+  people.forEach(p => { p.root.updateMatrixWorld(true); pose(p, t); });
   /* live screens (not every frame) */
   if (t - screenTick > .12) { screenTick = t; liveScreens.forEach(s => s.draw(t)); }
   /* confetti */
@@ -534,12 +663,13 @@ function frame(t) {
 }
 logoWall.material.map = logoTex(); logoWall.material.needsUpdate = true;
 wall7.material.map = tex(1024, 448, (x, w, h) => { x.fillStyle = '#0e2a4a'; x.fillRect(0, 0, w, h); x.fillStyle = '#e8c27c'; x.font = '600 34px Inter, sans-serif'; x.textAlign = 'center'; x.fillText('CONGRATULATIONS', w / 2, 120); x.fillStyle = '#fff'; x.font = 'italic 500 110px Cormorant, Georgia, serif'; x.fillText('Welcome aboard!', w / 2, 260); x.fillStyle = '#cfe9ff'; x.font = '500 30px Inter, sans-serif'; x.fillText('Another Zenbyte candidate placed', w / 2, 340); });
-flyTo(0, 0); cam.pos.copy(cam.to.pos); cam.at.copy(cam.to.at); cam.to = null;
+flyTo(0, 0); cam.pos.copy(cam.to.pos); cam.yaw0 = cam.to.yaw0; cam.to = null;
 
 loadPeople().then(() => {
   document.body.classList.add('ready');
   if (CAPTURE) {
-    window.renderAt = (t, pg, yw = 0) => { if (pg !== undefined && pg !== page) { mode = 'office'; document.body.classList.add('office'); showPage(pg); cam.t0 = t - 99; } yawT = yaw = yw; frame(t); };
+    window.renderAt = (t, pg, yw = 0) => { dbg = null; if (pg !== undefined && pg !== page) { mode = 'office'; document.body.classList.add('office'); showPage(pg); cam.t0 = t - 99; } yawT = yaw = yw; frame(t); };
+    window.debugCam = (px, py, pz, ax, ay, az, t) => { dbg = [V3(px, py, pz), V3(ax, ay, az)]; frame(t || 3); };
     window.capReady = true;
   } else {
     const t0 = performance.now();

@@ -14,7 +14,9 @@
 | Policies | Manager cabin | A one-to-one discussion across the desk |
 | Rewards and next steps | Celebration | An offer handshake, the team clapping, gold confetti |
 
-- **Look around:** drag with the mouse (or a finger) to rotate the view. Moving the mouse also turns the view gently. Double-click resets it.
+- **360° view:** drag with the mouse (or a finger) to turn all the way round. Moving the mouse also turns the view gently, the **360°** button spins it slowly by itself, and double-click resets it.
+- **Both sides of every room:** the opposite wall has a big screen in each zone, with people watching it. The screens show the welcome screen, skills in demand, live code, a client video call, hiring news, offer letters and "Placed this month".
+- **People:** realistic men and women in IT-office clothes: T-shirts and jeans, shirts, kurtis and dark suits, with different skin tones and hair.
 - **Change pages:** use the arrows, the scroll wheel, the arrow keys, the chapter buttons or the dots.
 - **One self-contained file:** works on GitHub Pages, any host, or offline.
 
@@ -23,7 +25,8 @@ Edit `src/P.json`, then run `python3 office-src/build.py`.
 
 ## How it is made (all free)
 - three.js (MIT) for the 3D.
-- The animated people are the free "X Bot" character from Mixamo, as included in the three.js examples. They are given different outfit colours, with poses for typing, handshakes, coffee, talking, presenting and clapping built in code.
+- **People:** two base characters, dressed in code in 14 outfit styles. Their poses for typing, handshakes, coffee, talking, presenting, clapping, walking and watching are all made in code.
+  - **Woman:** "mpfb" by Mika Suominen, made with MakeHuman/MPFB, from the TalkingHead project. Licensed CC0.
+  - **Man:** "rpm" from the Babylon.js Assets repository. Licensed CC BY 4.0, credit: Babylon.js.
+- `office-src/slim_glb.py` shrinks the character files for the web.
 - Fonts: Inter and Cormorant Garamond (SIL Open Font License).
-
-**More realistic people (free):** sign in at mixamo.com with a free Adobe account and download characters in business clothes plus animations such as "Typing", "Shaking Hands", "Drinking" and "Talking" (FBX, then convert to GLB with the free Blender). They can replace the X Bot in `office-src/models/`.
