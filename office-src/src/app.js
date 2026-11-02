@@ -16,6 +16,8 @@ const MOB = () => innerWidth < 900;
 /* ---------------- renderer / scene ---------------- */
 const canvas = $('#gl');
 const renderer = new T.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: CAPTURE });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.75)); renderer.setSize(innerWidth, innerHeight, false);
+const sea = ZenSea(renderer, CAPTURE);      /* the under-the-sea intro plays first */
 renderer.outputColorSpace = T.SRGBColorSpace;
 renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
@@ -667,7 +669,12 @@ function showPage(i) {
 chapNav.addEventListener('click', e => { const b = e.target.closest('button'); if (b) showPage(ROOMS[+b.dataset.k].pages[0]); });
 rail.addEventListener('click', e => { const b = e.target.closest('button'); if (b) showPage(+b.dataset.i); });
 $('#prev').onclick = () => showPage(page - 1); $('#next').onclick = () => showPage(page + 1);
-function enter() { if (mode !== 'intro') return; mode = 'office'; document.body.classList.add('office'); showPage(0); }
+function enter() {
+  if (mode !== 'intro' || !document.body.classList.contains('ready')) return;
+  mode = 'leaving'; document.body.classList.add('surfacing');
+  sea.leave(() => { mode = 'office'; document.body.classList.add('office'); showPage(0); setTimeout(() => document.body.classList.remove('surfacing'), 300); });
+}
+$('#skip').addEventListener('click', () => sea.skip());
 $('#enter').addEventListener('click', enter);
 let wheelLock = 0;
 addEventListener('wheel', e => {
@@ -801,12 +808,13 @@ flyTo(0, 0); cam.pos.copy(cam.to.pos); cam.yaw0 = cam.to.yaw0; cam.to = null;
 loadPeople().then(() => {
   document.body.classList.add('ready');
   if (CAPTURE) {
-    window.renderAt = (t, pg, yw = 0) => { dbg = null; if (pg !== undefined && pg !== page) { mode = 'office'; document.body.classList.add('office'); showPage(pg); cam.t0 = t - 99; } yawT = yaw = yw; frame(t); };
+    window.seaAt = t => sea.render(t);
+    window.renderAt = (t, pg, yw = 0) => { sea.active = false; dbg = null; if (pg !== undefined && pg !== page) { mode = 'office'; document.body.classList.add('office'); showPage(pg); cam.t0 = t - 99; } yawT = yaw = yw; frame(t); };
     window.debugCam = (px, py, pz, ax, ay, az, t) => { dbg = [V3(px, py, pz), V3(ax, ay, az)]; frame(t || 3); };
     window.capReady = true;
   } else {
     const t0 = performance.now();
-    (function loop() { frame((performance.now() - t0) / 1000); requestAnimationFrame(loop); })();
+    (function loop() { if (!sea.active) frame((performance.now() - t0) / 1000); requestAnimationFrame(loop); })();
   }
 });
 })();

@@ -2,6 +2,8 @@
 
 **Your Bridge to IT Careers.**
 
+**Intro: under the sea.** The Zenbyte star logo is a 3D starfish. It swims through a coral reef full of fish (a silver bait-ball, blue and yellow tangs, clownfish, angelfish, parrotfish), past kelp, light rays and bubbles. Then it rises to the centre, the name "Zenbyte Technologies" appears, and you press **Enter Zenbyte** to surface into the office. A "Skip intro" button is in the corner.
+
 `index.html` is a full 3D IT office with animated people. Every chapter of your content takes you to a different part of the office:
 
 | Chapter | Where you are | What the people are doing |
@@ -29,4 +31,4 @@ Edit `src/P.json`, then run `python3 office-src/build.py`.
   - **Woman:** "mpfb" by Mika Suominen, made with MakeHuman/MPFB, from the TalkingHead project. Licensed CC0.
   - **Man:** "rpm" from the Babylon.js Assets repository. Licensed CC BY 4.0, credit: Babylon.js.
 - `office-src/slim_glb.py` shrinks the character files for the web.
-- Fonts: Inter and Cormorant Garamond (SIL Open Font License).
+- Fonts: Anton (the logo-style title), Inter and Cormorant Garamond (SIL Open Font License).

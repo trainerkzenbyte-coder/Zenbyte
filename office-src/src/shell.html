@@ -17,13 +17,16 @@ __CSS__
 <canvas id="gl" aria-label="3D Zenbyte office. Drag to look around."></canvas>
 
 <section id="intro">
-  <img class="i-logo" src="data:image/png;base64,__LOGO__" alt="Zenbyte Technologies logo">
-  <p class="i-eye">Zenbyte Technologies</p>
-  <h1>Your bridge to<br><em>IT careers.</em></h1>
-  <p class="i-sub">Placement support for MNCs and product-based companies.<br>Chennai · Coimbatore · Bengaluru · across India.</p>
-  <button id="enter" type="button">Enter the office <span>→</span></button>
-  <p id="loadTxt" class="i-load">Loading the office…</p>
+  <div class="sea-title">
+    <img class="zt-mark" src="data:image/png;base64,__LOGO__" alt="">
+    <h1 class="zt" aria-label="Zenbyte Technologies"><span class="w"><i style="--i:0">Z</i><i style="--i:1">e</i><i style="--i:2">n</i><i style="--i:3">b</i><i style="--i:4">y</i><i style="--i:5">t</i><i style="--i:6">e</i></span> <span class="w"><i style="--i:8">T</i><i style="--i:9">e</i><i style="--i:10">c</i><i style="--i:11">h</i><i style="--i:12">n</i><i style="--i:13">o</i><i style="--i:14">l</i><i style="--i:15">o</i><i style="--i:16">g</i><i style="--i:17">i</i><i style="--i:18">e</i><i style="--i:19">s</i></span></h1>
+    <p class="zt-sub">Your bridge to IT careers</p>
+    <button id="enter" type="button">Enter Zenbyte <span>→</span></button>
+    <p id="loadTxt" class="i-load">Loading the office…</p>
+  </div>
+  <button id="skip" type="button">Skip intro ››</button>
 </section>
+<div id="flash" aria-hidden="true"></div>
 
 <header class="top">
   <div class="brand"><img src="data:image/png;base64,__LOGO__" alt=""><span><b>Zenbyte</b> Technologies</span></div>
@@ -42,9 +45,11 @@ __CSS__
 __THREE__
 </script>
 <script>
+const LOGO_SHAPES = __SHAPES__;
 const MAN_URL = 'data:model/gltf-binary;base64,__MAN__';
 const WOMAN_URL = 'data:model/gltf-binary;base64,__WOMAN__';
 __CONTENT__
+__SEA__
 __APP__
 </script>
 </body>
