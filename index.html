@@ -109,6 +109,33 @@ body.spin #spin{background:var(--gold);color:#0b1424;border-color:var(--gold)}
  .ctrl{left:.6rem;right:.6rem;justify-content:flex-end}.ctrl .hint{margin-right:auto}
 }
 
+/* ===== content panel v2: transparent, every point on its own colourful glass tile ===== */
+.panel{background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0 .3rem .4rem!important;scrollbar-width:none}
+.panel::-webkit-scrollbar{display:none}
+.panel .zone{background:rgba(8,14,30,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(255,255,255,.22);margin-bottom:.6rem}
+.panel .card>.ey,.panel .card>h2,.panel .card>.lede{position:relative}
+.panel .card{display:flex;flex-direction:column}
+.panel .head{padding:1.1rem 1.25rem 1.05rem;margin-bottom:.6rem;border-radius:16px;background:linear-gradient(135deg,rgba(9,16,34,.72),rgba(14,32,64,.55));border:1px solid rgba(255,255,255,.18);
+ backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 18px 40px rgba(0,0,0,.25);animation:kin .6s cubic-bezier(.2,.8,.2,1) backwards}
+.panel .head h2{margin:.55rem 0 .5rem}.panel .head .lede{margin:0;color:#e3e9f3}
+.panel .g{gap:.55rem}
+.panel .k{border-radius:14px;border:1px solid rgba(255,255,255,.28);color:#fff;padding:.95rem 1rem;
+ backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4);box-shadow:0 12px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.25);
+ background:linear-gradient(135deg,rgba(37,99,235,.82),rgba(14,165,233,.66))}
+.panel .k::before{display:none}
+.panel .k:nth-child(6n+2){background:linear-gradient(135deg,rgba(124,58,237,.82),rgba(219,39,119,.64))}
+.panel .k:nth-child(6n+3){background:linear-gradient(135deg,rgba(5,150,105,.84),rgba(20,184,166,.66))}
+.panel .k:nth-child(6n+4){background:linear-gradient(135deg,rgba(234,88,12,.84),rgba(245,158,11,.68))}
+.panel .k:nth-child(6n+5){background:linear-gradient(135deg,rgba(190,24,93,.82),rgba(244,63,94,.64))}
+.panel .k:nth-child(6n+6){background:linear-gradient(135deg,rgba(67,56,202,.84),rgba(56,189,248,.64))}
+.panel .k b{color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+.panel .k h4{color:#fff}.panel .k p{color:rgba(255,255,255,.88)}
+.panel .k.faq h4{color:#fff}
+.panel .k .cp span{border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.12)}
+/* data tiles (charts, bars, calculator, timeline) stay dark so the numbers read clearly */
+.panel .k:has(.bars),.panel .k:has(.sk),.panel .k.cal,.panel .k:has(.trk){background:linear-gradient(135deg,rgba(8,14,30,.82),rgba(14,30,60,.7))}
+.panel .nt{margin-top:.6rem;padding:.65rem .85rem;border-radius:12px;background:rgba(8,14,30,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#d5deeb;border:1px solid rgba(255,255,255,.14)}
+
 </style>
 </head>
 <body>
@@ -7007,33 +7034,34 @@ frontScreen(6, 4.6, 2.6, slideTex('PLACED THIS MONTH', 'Congratulations, team!',
 const people = [], loader = new T.GLTFLoader(), MODELS = {};
 const SKIN = [0xd9b49a, 0xc79c7e, 0xb98a6a, 0xe6c3a8, 0xa87b5e, 0xcfa587];
 const HAIR = [0x2a1d16, 0x1b1411, 0x3b2a1f, 0x120e0c, 0x4a3324];
-const OUTFITS = [
-  { sex: 'm', top: 0x24324a, bot: 0x24324a, shoe: 0x1a1a1a, look: 'suit' },
+const OUTFITS = [   /* men: formal shirt + trousers · women: T-shirt + jeans */
+  { sex: 'm', top: 0xf4f6f8, bot: 0x26324a, shoe: 0x1a1a1a },
   { sex: 'f', top: 0xf2f2f0, bot: 0x3d6ea8, shoe: 0x2a2a2a },
-  { sex: 'm', top: 0xe9eef5, bot: 0x2f3a4a, shoe: 0x3b2a20 },
+  { sex: 'm', top: 0xa9cbea, bot: 0x2e2f33, shoe: 0x3b2a20 },
   { sex: 'f', top: 0xb5404f, bot: 0x22324a, shoe: 0x3a2a22 },
-  { sex: 'm', top: 0x2f5d4a, bot: 0x3a5f8f, shoe: 0xeeeeee },
+  { sex: 'm', top: 0xe7e1d3, bot: 0x3a4250, shoe: 0x1a1a1a },
   { sex: 'f', top: 0x1d1f24, bot: 0x4a6f9c, shoe: 0x1a1a1a },
-  { sex: 'm', top: 0x8fb6dd, bot: 0xb59c74, shoe: 0x5a3b26 },
-  { sex: 'f', top: 0x2b2f3a, bot: 0x2b2f3a, shoe: 0x111111, look: 'suit' },
-  { sex: 'm', top: 0x7a1f2b, bot: 0x2a3d5c, shoe: 0xf2f2f2 },
-  { sex: 'm', top: 0x39424f, bot: 0x39424f, shoe: 0x161616, look: 'suit' },
-  { sex: 'f', top: 0x2f7d77, bot: 0x30343c, shoe: 0x4a3426 },
-  { sex: 'm', top: 0xf4f4f2, bot: 0x2d4f7c, shoe: 0xffffff },
-  { sex: 'f', top: 0xd8a9b8, bot: 0x3d5f8f, shoe: 0x2a2a2a },
-  { sex: 'm', top: 0x3b4450, bot: 0x2d4f7c, shoe: 0xe8e8e8 }
+  { sex: 'm', top: 0xd7e6f4, bot: 0x8a7a5e, shoe: 0x5a3b26 },
+  { sex: 'f', top: 0x2f7d77, bot: 0x2f4f7c, shoe: 0x111111 },
+  { sex: 'm', top: 0xf1d9de, bot: 0x1f2a3a, shoe: 0x161616 },
+  { sex: 'm', top: 0x8fa3b8, bot: 0x22252b, shoe: 0x161616 },
+  { sex: 'f', top: 0xd8a9b8, bot: 0x30507d, shoe: 0x4a3426 },
+  { sex: 'm', top: 0xffffff, bot: 0x4a4f57, shoe: 0x2a1e16 },
+  { sex: 'f', top: 0x6a5acd, bot: 0x3d5f8f, shoe: 0x2a2a2a },
+  { sex: 'm', top: 0xcfe0d4, bot: 0x2d3b55, shoe: 0x1a1a1a }
 ];
 /* grey copy of a texture so any colour can be applied to it */
 const greyCache = new Map();
-function grey(map, lift = 1.15) {
-  if (!map || !map.image) return null; if (greyCache.has(map)) return greyCache.get(map);
+function grey(map, lift = 1.15, flat = 1) {
+  if (!map || !map.image) return null; const ck = map.uuid + flat; if (greyCache.has(ck)) return greyCache.get(ck);
   const im = map.image, c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
   const d = x.getImageData(0, 0, c.width, c.height), a = d.data; let sum = 0, n = 0;
   for (let i = 0; i < a.length; i += 4) { const l = .3 * a[i] + .59 * a[i + 1] + .11 * a[i + 2]; a[i] = l; if (a[i + 3] > 20) { sum += l; n++; } }
   const k = Math.min(3, 205 / Math.max(1, sum / Math.max(1, n))) * lift;
-  for (let i = 0; i < a.length; i += 4) { const l = Math.min(255, a[i] * k); a[i] = a[i + 1] = a[i + 2] = l; }
+  const mean = sum / Math.max(1, n);
+  for (let i = 0; i < a.length; i += 4) { const l = Math.min(255, (mean + (a[i] - mean) * flat) * k); a[i] = a[i + 1] = a[i + 2] = l; }
   x.putImageData(d, 0, 0); const t = new T.CanvasTexture(c); t.flipY = map.flipY; t.colorSpace = T.SRGBColorSpace; t.wrapS = map.wrapS; t.wrapT = map.wrapT; t.anisotropy = 4;
-  greyCache.set(map, t); return t;
+  greyCache.set(ck, t); return t;
 }
 const _c = new T.Color(), _v = new T.Vector3();
 function tint(mat, hex, map) { const m = mat.clone(); if (map !== undefined) m.map = map; m.color.setHex(hex); m.metalness = 0; m.roughness = Math.max(.55, m.roughness || .7); return m; }
@@ -7047,7 +7075,7 @@ function dress(root, o, k) {
     const nm = (n.name + ' ' + mats.map(m => m.name).join(' ')).toLowerCase();
     let m = mats[0];
     if (/outfit_top/.test(nm)) {
-      m = tint(m, o.top, grey(m.map));
+      m = tint(m, o.top, grey(m.map, 1.12, .3));
       /* remove the bead necklace: it is made of small separate pieces, so fold every small piece away */
       const g = n.geometry = n.geometry.clone(), pos = g.attributes.position, idx = g.index;
       const par = new Int32Array(pos.count).map((_, i) => i), find = i => { while (par[i] !== i) { par[i] = par[par[i]]; i = par[i]; } return i; };
@@ -7057,8 +7085,12 @@ function dress(root, o, k) {
       const size = new Map(); for (let i = 0; i < pos.count; i++) { const r = find(i); size.set(r, (size.get(r) || 0) + 1); }
       let big = 0, bigR = -1; size.forEach((v, r) => { if (v > big) { big = v; bigR = r; } });
       for (let i = 0; i < pos.count; i++) if (find(i) !== bigR) pos.setXYZ(i, 0, 0, 0);
+      /* shirt tucked into the trousers: fold the long hem up to the belt and pull it in */
+      n.updateMatrixWorld(true);
+      const inv2 = new T.Matrix4().copy(n.matrixWorld).invert(), hipY = root.getObjectByName('Hips').getWorldPosition(new T.Vector3()).y, belt = hipY + .09 * root.scale.y / MODELS.m.scale;
+      for (let i = 0; i < pos.count; i++) { if (find(i) !== bigR) continue; _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (_v.y < belt) { _v.y = belt; _v.x *= .9; _v.z *= .9; _v.applyMatrix4(inv2); pos.setXYZ(i, _v.x, _v.y, _v.z); } }
     }
-    else if (/outfit_bottom/.test(nm)) m = tint(m, o.bot, grey(m.map));
+    else if (/outfit_bottom/.test(nm)) m = tint(m, o.bot, grey(m.map, 1.1, .45));
     else if (/footwear/.test(nm)) m = tint(m, o.shoe, grey(m.map, 1));
     else if (/hair|ponytail|eyebrow/.test(nm)) {
       m = tint(m, hair, grey(m.map, .9));
@@ -7090,6 +7122,48 @@ function dress(root, o, k) {
     n.material = m;
   });
 }
+/* Zenbyte ID card on a lanyard for everyone */
+const NAMES = ['Arun', 'Priya', 'Karthik', 'Divya', 'Rahul', 'Meena', 'Vijay', 'Anitha', 'Suresh', 'Kavya', 'Ravi', 'Deepa', 'Ajay', 'Lakshmi'];
+const cardTexCache = {};
+function cardTex(k) {
+  const nm = NAMES[k % NAMES.length]; if (cardTexCache[nm]) return cardTexCache[nm];
+  return cardTexCache[nm] = tex(220, 340, (x, w, h) => {
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, w, h);
+    const g = x.createLinearGradient(0, 0, w, 0); g.addColorStop(0, '#0e2a4a'); g.addColorStop(1, '#2d82d2'); x.fillStyle = g; x.fillRect(0, 0, w, 92);
+    x.drawImage($('#logoImg'), 14, 14, 62, 63); x.fillStyle = '#fff'; x.font = '700 22px Inter, sans-serif'; x.fillText('ZENBYTE', 84, 46); x.font = '500 13px Inter, sans-serif'; x.fillText('TECHNOLOGIES', 86, 66);
+    x.fillStyle = '#dfe7f1'; x.fillRect(60, 110, 100, 112); x.fillStyle = '#9fb3c8'; x.beginPath(); x.arc(110, 152, 26, 0, 7); x.fill(); x.beginPath(); x.ellipse(110, 222, 44, 34, 0, Math.PI, 0); x.fill();
+    x.fillStyle = '#0e2a4a'; x.font = '700 28px Inter, sans-serif'; x.textAlign = 'center'; x.fillText(nm, w / 2, 262);
+    x.fillStyle = '#5b6b80'; x.font = '500 16px Inter, sans-serif'; x.fillText('EMP ' + (2400 + k * 37), w / 2, 288);
+    x.fillStyle = '#e8c27c'; x.fillRect(0, h - 22, w, 22);
+  });
+}
+const lanyardMat = new T.MeshStandardMaterial({ color: 0x1f5fae, roughness: .6, side: T.DoubleSide });
+const clipMat = new T.MeshStandardMaterial({ color: 0xb9bec6, metalness: 1, roughness: .3 });
+function idCard(root, o, k) {
+  root.updateMatrixWorld(true);
+  const S = root.scale.y / MODELS[o.sex].scale;                 // body size factor
+  /* how far the chest sticks out at card height */
+  let front = .1 * S; const cy = 1.2 * S, ny = 1.43 * S;
+  root.traverse(n => { if (!n.isSkinnedMesh || !/top|casualsuit/i.test(n.name)) return; const pos = n.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) { _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (Math.abs(_v.x) < .05 * S && Math.abs(_v.y - cy) < .05 * S) front = Math.max(front, _v.z); } });
+  let neckF = .06 * S;
+  root.traverse(n => { if (!n.isSkinnedMesh || !/top|casualsuit/i.test(n.name)) return; const pos = n.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) { _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (Math.abs(Math.abs(_v.x) - .06 * S) < .02 * S && Math.abs(_v.y - ny) < .03 * S) neckF = Math.max(neckF, _v.z); } });
+  const spine = root.getObjectByName('Spine2'), g = new T.Group();
+  const card = new T.Mesh(new T.BoxGeometry(.058, .09, .004), [clipMat, clipMat, clipMat, clipMat, new T.MeshStandardMaterial({ map: cardTex(k), roughness: .35 }), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .4 })]);
+  card.position.set(0, cy - .045 * S, front + .012); card.rotation.x = -.08; g.add(card);
+  const clip = new T.Mesh(new T.BoxGeometry(.016, .012, .006), clipMat); clip.position.set(0, cy + .006 * S, front + .01); g.add(clip);
+  [-1, 1].forEach(sd => {                                     /* the strap from the neck to the card */
+    const a = new T.Vector3(sd * .062 * S, ny, neckF + .004), b = new T.Vector3(sd * .008, cy + .01 * S, front + .01);
+    const len = a.distanceTo(b), strap = new T.Mesh(new T.PlaneGeometry(.014, len), lanyardMat);
+    strap.position.copy(a).add(b).multiplyScalar(.5); strap.lookAt(strap.position.clone().add(new T.Vector3(0, 0, 1)));
+    strap.rotation.z = Math.atan2(b.x - a.x, a.y - b.y); strap.rotation.x = -Math.atan2(b.z - a.z, a.y - b.y); g.add(strap);
+  });
+  /* attach to the chest bone so it moves with the body */
+  const inv = new T.Matrix4().copy(spine.matrixWorld).invert();
+  g.updateMatrix(); g.applyMatrix4(inv); spine.add(g);
+  g.traverse(m => { if (m.isMesh) m.castShadow = true; });
+}
 const _a = new T.Vector3(), _b = new T.Vector3(), _q = new T.Quaternion(), _q2 = new T.Quaternion(), _q3 = new T.Quaternion(), _d = new T.Vector3();
 /* point a bone (towards its child) in a direction given in the person's own space: works for any skeleton */
 function aim(p, name, child, dir, w = 1) {
@@ -7110,6 +7184,7 @@ function spawn(zone, x, z, ry, mode, opts = {}) {
   const root = T.SkeletonUtils.clone(base.scene);
   const rel = o.sex === 'm' ? 1.04 + (k % 3) * .015 : .98 + (k % 2) * .02; root.scale.setScalar(base.scale * rel);
   dress(root, o, k);
+  idCard(root, o, k);
   const holder = group(ZX[zone] + x, 0, z, ry); holder.add(root);
   const b = {}; BONES.forEach(n => b[n] = root.getObjectByName(n));
   const rest = {}; BONES.forEach(n => { if (b[n]) rest[n] = b[n].quaternion.clone(); });
@@ -7151,9 +7226,44 @@ function ik(p, side, target, pole) {
   aimW(p, F, H, tw.clone().sub(_f));
 }
 function handDir(p, side, dir) { aim(p, side + 'Hand', side + 'HandMiddle1', dir); }
+function bone(p, n) { return p.b[n] || (p.b[n] = p.model.getObjectByName(n)); }
+/* turn the hand around its own length so the thumb side points along 'up' (person space) */
+const _h1 = new T.Vector3(), _h2 = new T.Vector3(), _h3 = new T.Vector3(), _h4 = new T.Vector3();
+function twist(p, side, up) {
+  const H = bone(p, side + 'Hand'), M = bone(p, side + 'HandMiddle1'), I = bone(p, side + 'HandIndex1'), K = bone(p, side + 'HandPinky1'); if (!H || !M || !I || !K) return;
+  H.updateWorldMatrix(true, true);
+  H.getWorldPosition(_h1); M.getWorldPosition(_h2); const dir = _h2.sub(_h1).normalize().clone();
+  I.getWorldPosition(_h3); K.getWorldPosition(_h4); const lat = _h3.sub(_h4); lat.sub(dir.clone().multiplyScalar(lat.dot(dir))).normalize();
+  const want = up.clone().applyQuaternion(p.root.quaternion); want.sub(dir.clone().multiplyScalar(want.dot(dir))).normalize();
+  let ang = Math.acos(clamp(lat.dot(want), -1, 1)); if (lat.clone().cross(want).dot(dir) < 0) ang = -ang;
+  _q.setFromAxisAngle(dir, ang); H.getWorldQuaternion(_q2); _q.multiply(_q2); H.parent.getWorldQuaternion(_q3); _q3.invert().multiply(_q);
+  H.quaternion.copy(_q3); H.updateMatrixWorld(true);
+}
+/* bend the fingers towards the palm (for holding a hand or a cup) */
+function curl(p, side, a) {
+  const H = bone(p, side + 'Hand'), M = bone(p, side + 'HandMiddle1'), I = bone(p, side + 'HandIndex1'), K = bone(p, side + 'HandPinky1'), Th = bone(p, side + 'HandThumb1'); if (!H || !M || !I || !K || !Th) return;
+  H.updateWorldMatrix(true, true);
+  H.getWorldPosition(_h1); M.getWorldPosition(_h2); const dir = _h2.clone().sub(_h1).normalize();
+  I.getWorldPosition(_h3); K.getWorldPosition(_h4); const lat = _h3.clone().sub(_h4).normalize();
+  Th.getWorldPosition(_h3); let palm = _h3.sub(_h1); palm.sub(dir.clone().multiplyScalar(palm.dot(dir))); palm.sub(lat.clone().multiplyScalar(palm.dot(lat))); palm.normalize();
+  ['Index', 'Middle', 'Ring', 'Pinky'].forEach(f => {
+    for (let j = 1; j <= 3; j++) {
+      const b0 = bone(p, side + 'Hand' + f + j), b1 = bone(p, side + 'Hand' + f + (j + 1)); if (!b0 || !b1) continue;
+      const th = a * j; aimWb(b0, b1, dir.clone().multiplyScalar(Math.cos(th)).add(palm.clone().multiplyScalar(Math.sin(th))));
+    }
+  });
+}
+function aimWb(bone, ch, worldDir) {
+  bone.updateWorldMatrix(true, false); ch.updateWorldMatrix(false, false);
+  bone.getWorldPosition(_a); ch.getWorldPosition(_b);
+  _q.setFromUnitVectors(_b.sub(_a).normalize(), worldDir.normalize());
+  bone.getWorldQuaternion(_q2); _q.multiply(_q2); bone.parent.getWorldQuaternion(_q3); _q3.invert().multiply(_q);
+  bone.quaternion.copy(_q3); bone.updateMatrixWorld(true);
+}
 function pose(p, t) {
   const ph = t + p.phase, m = p.mode;
-  BONES.forEach(n => { if (p.rest[n]) p.b[n].quaternion.copy(p.rest[n]); });
+  if (!p.allRest) { p.allRest = []; p.model.traverse(o => { if (o.isBone) p.allRest.push([o, o.quaternion.clone()]); }); }
+  p.allRest.forEach(([o, q]) => o.quaternion.copy(q));
   p.b.Hips.position.y = p.hipY; p.model.position.y = 0;
   p.model.updateMatrixWorld(true);
   const breathe = Math.sin(ph * 1.6) * .012;
@@ -7204,21 +7314,22 @@ function pose(p, t) {
   const R = p.opts.right === undefined ? 1 : p.opts.right;
   const hs = p.rel;                                           // body height factor
   if (m === 'shake') {
-    /* both right hands meet in the middle and shake up and down together */
-    const shaking = (t % 6) < 2.8, s = shaking ? Math.sin(t * 10) * .035 : 0;
-    const mw = V3(ZX[p.zone] + p.opts.meet[0], .98 * hs + s, p.opts.meet[1]);
-    const local = p.root.worldToLocal(mw.clone()); local.x -= .03;
-    ik(p, 'Right', local, L(-.6, -1, -.2)); handDir(p, 'Right', L(.15, -.15, 1));
+    /* right hands clasp in the middle: palms facing, thumbs up, fingers wrapped, a gentle up-and-down shake */
+    const shaking = (t % 6) < 2.8, sh = shaking ? Math.sin(t * 9) * .03 : 0;
+    const mw = V3(ZX[p.zone] + p.opts.meet[0], .97 * hs + sh, p.opts.meet[1]);
+    const local = p.root.worldToLocal(mw.clone()); local.x -= .022; local.z -= .02;
+    ik(p, 'Right', local, L(-.7, -1, -.1)); handDir(p, 'Right', L(.25, -.05, 1));
+    twist(p, 'Right', L(0, 1, 0)); curl(p, 'Right', .55);
     aim(p, 'Neck', 'Head', L(0, 1, .12));
   } else if (m === 'coffee') {
     /* cup held in front of the chest, lifted to the mouth now and then */
     const sip = Math.max(0, Math.sin(ph * .7)) ** 4;
     const chest = L(.1, 1.12 * hs, .27), mouth = L(.04, 1.48 * hs, .16);
-    ik(p, 'Left', chest.clone().lerp(mouth, sip), L(.8, -1, -.3)); handDir(p, 'Left', L(-.5, .2 + sip * .5, .8));
+    ik(p, 'Left', chest.clone().lerp(mouth, sip), L(.8, -1, -.3)); handDir(p, 'Left', L(-.6, .15 + sip * .4, .7)); twist(p, 'Left', L(0, 1, 0)); curl(p, 'Left', .62);
     const g = Math.max(0, Math.sin(ph * 1.6 + 1)) * .45;
     aim(p, 'RightArm', 'RightForeArm', L(-.16, -.95, .12 + g * .3)); aim(p, 'RightForeArm', 'RightHand', L(.25, -.45 + g, .8));
     aim(p, 'Neck', 'Head', L(Math.sin(ph * .8) * .15, 1, .05 + sip * .1));
-    if (p.cup) { p.b.LeftHand.getWorldPosition(_a); p.b.LeftHandMiddle1.getWorldPosition(_b); p.cup.position.copy(_a).lerp(_b, .6); p.cup.position.y += .01; p.cup.rotation.set(0, 0, 0); }
+    if (p.cup) { p.b.LeftHand.getWorldPosition(_a); p.b.LeftHandMiddle1.getWorldPosition(_b); const th = bone(p, 'LeftHandThumb1').getWorldPosition(new T.Vector3()); p.cup.position.copy(_a).lerp(_b, .55).lerp(th, .35); p.cup.position.y -= .02; p.cup.rotation.set(0, 0, 0); }
   } else if (m === 'talk') {
     const g1 = Math.max(0, Math.sin(ph * 1.7)) * .6, g2 = Math.max(0, Math.sin(ph * 1.3 + 2)) * .5;
     aim(p, 'RightArm', 'RightForeArm', L(-.2, -.92, .15 + g1 * .3)); aim(p, 'RightForeArm', 'RightHand', L(.15, -.35 + g1, .9));
@@ -7233,7 +7344,7 @@ function pose(p, t) {
     /* palms meet in front of the chest */
     const gap = .015 + .07 * (.5 + .5 * Math.sin(ph * 13));
     ik(p, 'Left', L(gap, 1.2 * hs, .3), L(1, -1, -.4)); ik(p, 'Right', L(-gap, 1.2 * hs, .3), L(-1, -1, -.4));
-    handDir(p, 'Left', L(-.35, .45, 1)); handDir(p, 'Right', L(.35, .45, 1));
+    handDir(p, 'Left', L(-.35, .5, 1)); handDir(p, 'Right', L(.35, .5, 1)); twist(p, 'Left', L(0, 1, .3)); twist(p, 'Right', L(0, 1, .3)); curl(p, 'Left', .12); curl(p, 'Right', .12);
     aim(p, 'Neck', 'Head', L(Math.sin(ph * .5) * .15, 1, .08));
   } else if (m === 'watch') {
     aim(p, 'Neck', 'Head', L(Math.sin(ph * .3) * .1, 1, -.02));
@@ -7263,6 +7374,9 @@ function showPage(i) {
     panel.innerHTML = `<div class="zone"><i></i>${E(ZONE_NAME[z])}</div>` + pageHTML(i);
     panel.querySelector('.ey').dataset.n = String(i + 1).padStart(2, '0');
     if (/DataMeet/.test(panel.textContent)) panel.querySelectorAll('.nt').forEach(n => { if (/DataMeet/.test(n.textContent)) n.remove(); });
+    /* heading, eyebrow and intro go together on one glass card; every point becomes its own colourful tile */
+    const card = panel.querySelector('.card'), head = document.createElement('div'); head.className = 'head';
+    ['.ey', 'h2', '.lede'].forEach(q => { const e = card.querySelector(':scope > ' + q); if (e) head.appendChild(e); }); card.prepend(head);
     afterRender(i, panel); panel.scrollTop = 0;
     requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.remove('out')));
   }, prevZone === z ? 260 : 700);
@@ -7332,7 +7446,7 @@ function loadPeople() {
     MODELS.m = prep(man); MODELS.f = prep(woman);
     /* ---- reception: receptionist, a handshake, visitors; opposite side: visitors watching the welcome screen ---- */
     spawn(0, -.3, -4.05, 0, 'look', { outfit: 1 });
-    spawn(0, -.42, -.4, Math.PI / 2, 'shake', { outfit: 0, meet: [0, -.4] }); spawn(0, .42, -.4, -Math.PI / 2, 'shake', { outfit: 4, meet: [0, -.4] });
+    spawn(0, -.37, -.4, Math.PI / 2, 'shake', { outfit: 0, meet: [0, -.4] }); spawn(0, .37, -.4, -Math.PI / 2, 'shake', { outfit: 2, meet: [0, -.4] });
     spawn(0, 0, 0, 0, 'walk', { path: [[-5.6, -1.7], [-1.6, -1.9]], len: 8, speed: .7, outfit: 3 });
     spawn(0, -1.6, 6.55, 0, 'sitMeet', { outfit: 5 }); spawn(0, -.4, 6.55, 0, 'sitMeet', { outfit: 6 });
     spawn(0, 1.6, 6.9, 0, 'watch', { outfit: 13, arms: 'cross' });
@@ -7359,7 +7473,7 @@ function loadPeople() {
     seat(5, 0, -4.3, 0, 'sitTalk', { outfit: 0 }); seat(5, -.6, -2.3, Math.PI, 'sitTalk', { outfit: 3 }); seat(5, .6, -2.3, Math.PI, 'sitMeet', { outfit: 6 });
     spawn(5, -.5, 7.3, .1, 'present', { right: 1, outfit: 7 }); spawn(5, .7, 7.1, -.2, 'watch', { outfit: 4 });
     /* ---- celebration: offer handshake, team clapping; opposite side: everyone watching "Placed this month" ---- */
-    spawn(6, -.42, -2.4, Math.PI / 2, 'shake', { outfit: 9, meet: [0, -2.4] }); spawn(6, .42, -2.4, -Math.PI / 2, 'shake', { outfit: 12, meet: [0, -2.4] });
+    spawn(6, -.37, -2.4, Math.PI / 2, 'shake', { outfit: 9, meet: [0, -2.4] }); spawn(6, .37, -2.4, -Math.PI / 2, 'shake', { outfit: 12, meet: [0, -2.4] });
     [[-2.3, -2.9, .5], [2.3, -2.9, -.5], [-1.6, -1.2, .7], [1.6, -1.2, -.7], [0, -4.1, 0]].forEach(([x, z, r], k) => spawn(6, x, z, r, 'clap', { outfit: [2, 5, 8, 10, 13][k] }));
     [[-1.8, 7.2], [-.6, 7.4], [.6, 7.3], [1.8, 7.1]].forEach(([x, z], k) => spawn(6, x, z, 0, k % 2 ? 'clap' : 'watch', { outfit: [1, 4, 3, 11][k] }));
     if (/lineup/.test(location.search)) OUTFITS.forEach((o, i) => spawn(0, -5.2 + i * .8, 3.2, Math.PI, 'look', { outfit: i }));

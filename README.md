@@ -16,7 +16,7 @@
 
 - **360° view:** drag with the mouse (or a finger) to turn all the way round. Moving the mouse also turns the view gently, the **360°** button spins it slowly by itself, and double-click resets it.
 - **Both sides of every room:** the opposite wall has a big screen in each zone, with people watching it. The screens show the welcome screen, skills in demand, live code, a client video call, hiring news, offer letters and "Placed this month".
-- **People:** realistic men and women in IT-office clothes: T-shirts and jeans, shirts, kurtis and dark suits, with different skin tones and hair.
+- **People:** men in formal shirts and trousers, women in T-shirts and jeans, everyone wearing a Zenbyte ID card on a lanyard.
 - **Change pages:** use the arrows, the scroll wheel, the arrow keys, the chapter buttons or the dots.
 - **One self-contained file:** works on GitHub Pages, any host, or offline.
 
