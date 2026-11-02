@@ -46,7 +46,7 @@ body.office .top{opacity:1;pointer-events:auto}
 #chap button:hover{color:#fff}#chap button.on{background:var(--gold);color:#0b1424;font-weight:700}
 
 /* content panel */
-.panel{position:fixed;z-index:15;top:5.2rem;bottom:5rem;width:min(30rem,40vw);overflow:auto;scrollbar-width:thin;padding:1.6rem 1.7rem 1.8rem;border-radius:6px;
+.panel{position:fixed;z-index:15;top:5.2rem;max-height:calc(100vh - 10.4rem);width:min(30rem,40vw);overflow:auto;scrollbar-width:thin;padding:1.6rem 1.7rem 1.8rem;border-radius:6px;
  background:linear-gradient(160deg,rgba(14,22,40,.88),rgba(6,10,20,.9));border:1px solid var(--line);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
  box-shadow:0 30px 80px rgba(0,0,0,.45);transition:opacity .45s,transform .6s cubic-bezier(.2,.8,.2,1)}
 .panel.right{right:clamp(1rem,3vw,2.4rem)}.panel.left{left:clamp(1rem,3vw,2.4rem)}
@@ -6851,7 +6851,7 @@ function deskUnit(parent, x, z, ry, seed, withChair = true) {
   box(.44, .02, .14, M.black, 0, .76, .12, g);          // keyboard
   box(.06, .02, .1, M.black, .32, .76, .14, g);         // mouse
   if (Math.random() < .5) { const c = cyl(.035, .03, .1, M.cup, -.5, .8, .1, g); }
-  if (withChair) chair(g, 0, .62, Math.PI);
+  if (withChair) chair(g, 0, .62, 0);
   return g;
 }
 function chair(parent, x, z, ry) {
@@ -6976,7 +6976,7 @@ const Z6 = group(ZX[5], 0, 0);
 const mdesk = group(0, 0, -3.4, 0, Z6);
 box(2.2, .05, .95, M.oak, 0, .76, 0, mdesk); box(2.1, .72, .06, M.black, 0, .37, -.4, mdesk); box(.06, .72, .9, M.black, -1.05, .37, 0, mdesk); box(.06, .72, .9, M.black, 1.05, .37, 0, mdesk);
 monitor(mdesk, .5, -.15, -.25, 55);
-chair(Z6, 0, -4.35, 0); chair(Z6, -.6, -2.2, Math.PI); chair(Z6, .6, -2.2, Math.PI);
+
 const shelf = group(-4.5, 0, -5.5, 0, Z6); box(2.4, 2.4, .4, M.oak, 0, 1.2, 0, shelf);
 for (let i = 0; i < 18; i++) box(.06, .3, .25, [M.accent, M.white, M.black][i % 3], -1 + (i % 9) * .25, .65 + Math.floor(i / 9) * .8, .1, shelf);
 plant(Z6, 4.8, -4.8, 1.2);
@@ -6996,7 +6996,7 @@ const sofaF1 = group(ZX[0] - 1, 0, 6.6, Math.PI, null); box(2.4, .42, .85, M.sof
 frontScreen(1, 4.6, 2.6, slideTex('SKILLS WE PLACE FOR', 'In demand right now', ['Data Science · ML · Data Engineering', 'Java · Full Stack · Python · .NET', 'DevOps · Cloud · Testing · Salesforce'], 'Around 50 offers every month'));
 frontScreen(2, 4.6, 2.6, codeScreen(77).t);
 frontScreen(3, 4.4, 2.48, callTex);
-[[-1.2, 6.9], [0, 6.9], [1.2, 6.9]].forEach(([x, z]) => chair(Z4, x, z, 0));
+
 frontScreen(4, 3.8, 2.14, slideTex('HIRING NOW', 'Fresh openings this week', ['Java Developer · Chennai', 'Data Engineer · Bengaluru', 'QA Automation · Coimbatore'], 'Ask your counsellor to apply'));
 frontScreen(5, 3.8, 2.14, slideTex('THIS MONTH', 'Offer letters released', ['Day 1 to 45: usual time to place', 'Salary talks and counter offers', 'Joining support included'], 'Zenbyte Technologies'));
 frontScreen(6, 4.6, 2.6, slideTex('PLACED THIS MONTH', 'Congratulations, team!', ['Anitha · Data Analyst · MNC', 'Rahul · Java Developer · Product company', 'Meena · QA Engineer · Bank IT'], 'Refer friends and earn rewards'));
@@ -7048,10 +7048,15 @@ function dress(root, o, k) {
     let m = mats[0];
     if (/outfit_top/.test(nm)) {
       m = tint(m, o.top, grey(m.map));
-      /* remove the bead necklace: fold its vertices into the chest */
-      const g = n.geometry = n.geometry.clone(), pos = g.attributes.position, inv = new T.Matrix4().copy(n.matrixWorld).invert();
-      const neck = root.getObjectByName('Neck').getWorldPosition(new T.Vector3()), chest = root.getObjectByName('Spine2').getWorldPosition(new T.Vector3());
-      for (let i = 0; i < pos.count; i++) { _v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (_v.y > neck.y - .035 * root.scale.y / .01 * .01 && Math.hypot(_v.x - neck.x, _v.z - neck.z) < .2 * root.scale.y / (MODELS.m.scale || 1)) { _v.copy(chest).applyMatrix4(inv); pos.setXYZ(i, _v.x, _v.y, _v.z); } }
+      /* remove the bead necklace: it is made of small separate pieces, so fold every small piece away */
+      const g = n.geometry = n.geometry.clone(), pos = g.attributes.position, idx = g.index;
+      const par = new Int32Array(pos.count).map((_, i) => i), find = i => { while (par[i] !== i) { par[i] = par[par[i]]; i = par[i]; } return i; };
+      const key = new Map();
+      for (let i = 0; i < pos.count; i++) { const k = pos.getX(i).toFixed(4) + ',' + pos.getY(i).toFixed(4) + ',' + pos.getZ(i).toFixed(4); if (key.has(k)) par[find(i)] = find(key.get(k)); else key.set(k, i); }
+      for (let i = 0; i < idx.count; i += 3) { const a0 = find(idx.getX(i)); par[find(idx.getX(i + 1))] = a0; par[find(idx.getX(i + 2))] = a0; }
+      const size = new Map(); for (let i = 0; i < pos.count; i++) { const r = find(i); size.set(r, (size.get(r) || 0) + 1); }
+      let big = 0, bigR = -1; size.forEach((v, r) => { if (v > big) { big = v; bigR = r; } });
+      for (let i = 0; i < pos.count; i++) if (find(i) !== bigR) pos.setXYZ(i, 0, 0, 0);
     }
     else if (/outfit_bottom/.test(nm)) m = tint(m, o.bot, grey(m.map));
     else if (/footwear/.test(nm)) m = tint(m, o.shoe, grey(m.map, 1));
@@ -7112,7 +7117,40 @@ function spawn(zone, x, z, ry, mode, opts = {}) {
   if (mode === 'coffee') p.cup = cyl(.045, .038, .11, M.cup, 0, 0, 0, null);
   people.push(p); return p;
 }
+function seat(zone, x, z, ry, mode, opts) {
+  /* chair under the person, backrest behind them */
+  chair(null, ZX[zone] + x - Math.sin(ry) * .06, z - Math.cos(ry) * .06, ry + Math.PI);
+  return spawn(zone, x, z, ry, mode, opts);
+}
 const L = (x, y, z) => _d.set(x, y, z).clone();
+/* two-bone IK: put the hand on a point (in the person's own space), elbow pointing towards 'pole' */
+const _s = new T.Vector3(), _e = new T.Vector3(), _t = new T.Vector3(), _p = new T.Vector3(), _f = new T.Vector3();
+function aimW(p, name, child, worldDir) {
+  const bone = p.b[name], ch = p.b[child]; if (!bone || !ch) return;
+  bone.updateWorldMatrix(true, false); ch.updateWorldMatrix(false, false);
+  bone.getWorldPosition(_a); ch.getWorldPosition(_b);
+  _q.setFromUnitVectors(_b.sub(_a).normalize(), worldDir.clone().normalize());
+  bone.getWorldQuaternion(_q2); _q.multiply(_q2);
+  bone.parent.getWorldQuaternion(_q3); _q3.invert().multiply(_q);
+  bone.quaternion.copy(_q3); bone.updateMatrixWorld(true);
+}
+function toWorld(p, v) { return v.clone().applyMatrix4(p.root.matrixWorld); }
+function ik(p, side, target, pole) {
+  const U = side + 'Arm', F = side + 'ForeArm', H = side + 'Hand';
+  if (!p.len) { p.len = {}; }
+  if (!p.len[side]) { p.b[U].getWorldPosition(_a); p.b[F].getWorldPosition(_b); p.b[H].getWorldPosition(_e); p.len[side] = [_a.distanceTo(_b), _b.distanceTo(_e)]; }
+  const [l1, l2] = p.len[side];
+  p.b[U].updateWorldMatrix(true, false); p.b[U].getWorldPosition(_s);
+  const tw = toWorld(p, target), d = tw.clone().sub(_s), dist = Math.min(Math.max(d.length(), .05), (l1 + l2) * .999);
+  d.normalize();
+  const cosA = clamp((l1 * l1 + dist * dist - l2 * l2) / (2 * l1 * dist), -1, 1), A = Math.acos(cosA);
+  const pw = pole.clone().applyQuaternion(p.root.quaternion); pw.sub(_p.copy(d).multiplyScalar(pw.dot(d))).normalize();
+  const elbow = _s.clone().add(d.clone().multiplyScalar(Math.cos(A) * l1)).add(pw.multiplyScalar(Math.sin(A) * l1));
+  aimW(p, U, F, elbow.clone().sub(_s));
+  p.b[F].getWorldPosition(_f);
+  aimW(p, F, H, tw.clone().sub(_f));
+}
+function handDir(p, side, dir) { aim(p, side + 'Hand', side + 'HandMiddle1', dir); }
 function pose(p, t) {
   const ph = t + p.phase, m = p.mode;
   BONES.forEach(n => { if (p.rest[n]) p.b[n].quaternion.copy(p.rest[n]); });
@@ -7151,30 +7189,36 @@ function pose(p, t) {
     aim(p, 'LeftFoot', 'LeftToeBase', L(0, -.3, 1)); aim(p, 'RightFoot', 'RightToeBase', L(0, -.3, 1));
     aim(p, 'Spine', 'Spine2', L(0, 1, m === 'type' ? .18 : .06));
     if (m === 'type') {
-      const k1 = Math.sin(ph * 15) * .06, k2 = Math.sin(ph * 13 + 1.3) * .06;
-      aim(p, 'LeftArm', 'LeftForeArm', L(.22, -.85, .42)); aim(p, 'RightArm', 'RightForeArm', L(-.22, -.85, .42));
-      aim(p, 'LeftForeArm', 'LeftHand', L(-.2, -.1 + k1, 1)); aim(p, 'RightForeArm', 'RightHand', L(.2, -.1 + k2, 1));
-      aim(p, 'Neck', 'Head', L(Math.sin(ph * .4) * .12, 1, .22));
+      const k1 = Math.max(0, Math.sin(ph * 15)) * .025, k2 = Math.max(0, Math.sin(ph * 13 + 1.3)) * .025;
+      ik(p, 'Left', L(.13, .8 + k1, .46), L(.8, -1, -.3)); ik(p, 'Right', L(-.13, .8 + k2, .46), L(-.8, -1, -.3));
+      handDir(p, 'Left', L(-.15, -.25, 1)); handDir(p, 'Right', L(.15, -.25, 1));
+      aim(p, 'Neck', 'Head', L(Math.sin(ph * .4) * .1, 1, .2));
     } else {
-      const g = m === 'sitTalk' ? Math.max(0, Math.sin(ph * 1.3)) * .5 : 0;
-      aim(p, 'LeftArm', 'LeftForeArm', L(.2, -.88, .35)); aim(p, 'RightArm', 'RightForeArm', L(-.2, -.88, .35));
-      aim(p, 'LeftForeArm', 'LeftHand', L(-.3, -.15, 1)); aim(p, 'RightForeArm', 'RightHand', L(.25, -.15 + g, 1));
+      const g = m === 'sitTalk' ? Math.max(0, Math.sin(ph * 1.3)) * .16 : 0;
+      ik(p, 'Left', L(.16, .66, .38), L(.8, -1, -.3)); ik(p, 'Right', L(-.16, .66 + g, .38 + g * .5), L(-.8, -1, -.3));
+      handDir(p, 'Left', L(-.2, -.3, 1)); handDir(p, 'Right', L(.2, -.3 + g * 2, 1));
       aim(p, 'Neck', 'Head', L(Math.sin(ph * .7) * .22, 1, .05));
     }
     return;
   }
   const R = p.opts.right === undefined ? 1 : p.opts.right;
+  const hs = p.rel;                                           // body height factor
   if (m === 'shake') {
-    const shaking = (ph % 6) < 2.6, s = shaking ? Math.sin(ph * 11) * .1 : 0;
-    aim(p, 'RightArm', 'RightForeArm', L(-.1, -.85, .45)); aim(p, 'RightForeArm', 'RightHand', L(-.12, .02 + s, 1));
-    aim(p, 'Neck', 'Head', L(0, 1, .1));
+    /* both right hands meet in the middle and shake up and down together */
+    const shaking = (t % 6) < 2.8, s = shaking ? Math.sin(t * 10) * .035 : 0;
+    const mw = V3(ZX[p.zone] + p.opts.meet[0], .98 * hs + s, p.opts.meet[1]);
+    const local = p.root.worldToLocal(mw.clone()); local.x -= .03;
+    ik(p, 'Right', local, L(-.6, -1, -.2)); handDir(p, 'Right', L(.15, -.15, 1));
+    aim(p, 'Neck', 'Head', L(0, 1, .12));
   } else if (m === 'coffee') {
-    const sip = Math.max(0, Math.sin(ph * .7)) ** 6;
-    aim(p, 'LeftArm', 'LeftForeArm', L(.16, -.95, .2 + sip * .2)); aim(p, 'LeftForeArm', 'LeftHand', L(-.4, .5 + sip * .9, .75 - sip * .3));
+    /* cup held in front of the chest, lifted to the mouth now and then */
+    const sip = Math.max(0, Math.sin(ph * .7)) ** 4;
+    const chest = L(.1, 1.12 * hs, .27), mouth = L(.04, 1.48 * hs, .16);
+    ik(p, 'Left', chest.clone().lerp(mouth, sip), L(.8, -1, -.3)); handDir(p, 'Left', L(-.5, .2 + sip * .5, .8));
     const g = Math.max(0, Math.sin(ph * 1.6 + 1)) * .45;
     aim(p, 'RightArm', 'RightForeArm', L(-.16, -.95, .12 + g * .3)); aim(p, 'RightForeArm', 'RightHand', L(.25, -.45 + g, .8));
-    aim(p, 'Neck', 'Head', L(Math.sin(ph * .8) * .18, 1, .05 - sip * .15));
-    if (p.cup) { p.b.LeftHand.updateWorldMatrix(true, false); p.b.LeftHand.getWorldPosition(_a); p.cup.position.copy(_a); p.cup.position.y += .02; }
+    aim(p, 'Neck', 'Head', L(Math.sin(ph * .8) * .15, 1, .05 + sip * .1));
+    if (p.cup) { p.b.LeftHand.getWorldPosition(_a); p.b.LeftHandMiddle1.getWorldPosition(_b); p.cup.position.copy(_a).lerp(_b, .6); p.cup.position.y += .01; p.cup.rotation.set(0, 0, 0); }
   } else if (m === 'talk') {
     const g1 = Math.max(0, Math.sin(ph * 1.7)) * .6, g2 = Math.max(0, Math.sin(ph * 1.3 + 2)) * .5;
     aim(p, 'RightArm', 'RightForeArm', L(-.2, -.92, .15 + g1 * .3)); aim(p, 'RightForeArm', 'RightHand', L(.15, -.35 + g1, .9));
@@ -7186,9 +7230,11 @@ function pose(p, t) {
     aim(p, 'LeftArm', 'LeftForeArm', L(.18, -.9, .22)); aim(p, 'LeftForeArm', 'LeftHand', L(-.2, -.2 + Math.max(0, Math.sin(ph * 1.5)) * .4, .9));
     aim(p, 'Neck', 'Head', L(-.3 * R + Math.sin(ph * .5) * .25, 1, .05));
   } else if (m === 'clap') {
-    const c = Math.sin(ph * 12) * .12;
-    aim(p, 'LeftArm', 'LeftForeArm', L(.22, -.78, .5)); aim(p, 'RightArm', 'RightForeArm', L(-.22, -.78, .5));
-    aim(p, 'LeftForeArm', 'LeftHand', L(-.6 - c, .45, .7)); aim(p, 'RightForeArm', 'RightHand', L(.6 + c, .45, .7));
+    /* palms meet in front of the chest */
+    const gap = .015 + .07 * (.5 + .5 * Math.sin(ph * 13));
+    ik(p, 'Left', L(gap, 1.2 * hs, .3), L(1, -1, -.4)); ik(p, 'Right', L(-gap, 1.2 * hs, .3), L(-1, -1, -.4));
+    handDir(p, 'Left', L(-.35, .45, 1)); handDir(p, 'Right', L(.35, .45, 1));
+    aim(p, 'Neck', 'Head', L(Math.sin(ph * .5) * .15, 1, .08));
   } else if (m === 'watch') {
     aim(p, 'Neck', 'Head', L(Math.sin(ph * .3) * .1, 1, -.02));
     if (p.opts.arms === 'cross') { aim(p, 'LeftArm', 'LeftForeArm', L(.18, -.9, .3)); aim(p, 'RightArm', 'RightForeArm', L(-.18, -.9, .3)); aim(p, 'LeftForeArm', 'LeftHand', L(-1, .35, .35)); aim(p, 'RightForeArm', 'RightHand', L(1, .25, .4)); }
@@ -7286,8 +7332,8 @@ function loadPeople() {
     MODELS.m = prep(man); MODELS.f = prep(woman);
     /* ---- reception: receptionist, a handshake, visitors; opposite side: visitors watching the welcome screen ---- */
     spawn(0, -.3, -4.05, 0, 'look', { outfit: 1 });
-    spawn(0, -.47, -.4, Math.PI / 2, 'shake', { outfit: 0 }); spawn(0, .47, -.4, -Math.PI / 2, 'shake', { outfit: 4 });
-    spawn(0, 0, 0, 0, 'walk', { path: [[-5.4, 1.2], [1.6, .9]], len: 14, speed: .75, outfit: 3 });
+    spawn(0, -.42, -.4, Math.PI / 2, 'shake', { outfit: 0, meet: [0, -.4] }); spawn(0, .42, -.4, -Math.PI / 2, 'shake', { outfit: 4, meet: [0, -.4] });
+    spawn(0, 0, 0, 0, 'walk', { path: [[-5.6, -1.7], [-1.6, -1.9]], len: 8, speed: .7, outfit: 3 });
     spawn(0, -1.6, 6.55, 0, 'sitMeet', { outfit: 5 }); spawn(0, -.4, 6.55, 0, 'sitMeet', { outfit: 6 });
     spawn(0, 1.6, 6.9, 0, 'watch', { outfit: 13, arms: 'cross' });
     /* ---- data wall: presenter and team; opposite side: team reading the skills screen ---- */
@@ -7300,20 +7346,20 @@ function loadPeople() {
     spawn(2, 0, 0, 0, 'walk', { path: [[-5, -.3], [5, -.3]], len: 20, speed: .8, outfit: 9 });
     spawn(2, -.7, 7.4, .2, 'present', { right: 1, outfit: 13 }); spawn(2, .6, 7.2, -.2, 'watch', { outfit: 10, arms: 'cross' });
     /* ---- meeting room; opposite side: video call with the client ---- */
-    [[-1.4, -3.35, 0], [0, -3.4, 0], [1.4, -3.35, 0], [-1.4, -1.85, Math.PI], [1.4, -1.85, Math.PI]].forEach(([x, z, r], k) => { chair(Z4, x, z + (r ? .2 : -.2), r ? Math.PI : 0); spawn(3, x, z, r ? 0 : Math.PI, 'sitMeet', { outfit: [0, 3, 6, 7, 2][k] }); });
+    [[-1.4, -3.45, 0], [0, -3.5, 0], [1.4, -3.45, 0], [-1.4, -1.75, Math.PI], [1.4, -1.75, Math.PI]].forEach(([x, z, r], k) => seat(3, x, z, r, 'sitMeet', { outfit: [0, 3, 6, 7, 2][k] }));
     spawn(3, 2.6, -4.6, -.6, 'present', { right: 1, outfit: 9 });
-    spawn(3, -1.2, 6.75, 0, 'sitTalk', { outfit: 12 }); spawn(3, 0, 6.75, 0, 'sitMeet', { outfit: 4 }); spawn(3, 1.2, 6.75, 0, 'sitMeet', { outfit: 1 });
+    seat(3, -1.2, 6.75, 0, 'sitTalk', { outfit: 12 }); seat(3, 0, 6.75, 0, 'sitMeet', { outfit: 4 }); seat(3, 1.2, 6.75, 0, 'sitMeet', { outfit: 1 });
     /* ---- coffee break; opposite side: watching the hiring news ---- */
     spawn(4, -3.2, -4.1, 0, 'coffee', { outfit: 8 }); spawn(4, -2.4, -3.2, Math.PI * .85, 'talk', { outfit: 3 });
     spawn(4, 2.1, -2.1, Math.PI * .3, 'coffee', { outfit: 5 }); spawn(4, 3.1, -2.2, -Math.PI * .4, 'coffee', { outfit: 11 });
     spawn(4, 2.6, -1.4, Math.PI * 1.02, 'talk', { outfit: 12 });
-    spawn(4, 0, 0, 0, 'walk', { path: [[-4.6, .6], [4.2, 1.0]], len: 18, speed: .8, outfit: 6 });
+    spawn(4, 0, 0, 0, 'walk', { path: [[-4.6, -.7], [1.2, -.5]], len: 11.6, speed: .8, outfit: 6 });
     spawn(4, -.6, 7.3, .1, 'coffee', { outfit: 13 }); spawn(4, .6, 7.4, -.1, 'watch', { outfit: 1, arms: 'cross' });
     /* ---- manager cabin; opposite side: offer review ---- */
-    spawn(5, 0, -4.15, 0, 'sitTalk', { outfit: 0 }); spawn(5, -.6, -2.42, Math.PI, 'sitTalk', { outfit: 3 }); spawn(5, .6, -2.42, Math.PI, 'sitMeet', { outfit: 6 });
+    seat(5, 0, -4.3, 0, 'sitTalk', { outfit: 0 }); seat(5, -.6, -2.3, Math.PI, 'sitTalk', { outfit: 3 }); seat(5, .6, -2.3, Math.PI, 'sitMeet', { outfit: 6 });
     spawn(5, -.5, 7.3, .1, 'present', { right: 1, outfit: 7 }); spawn(5, .7, 7.1, -.2, 'watch', { outfit: 4 });
     /* ---- celebration: offer handshake, team clapping; opposite side: everyone watching "Placed this month" ---- */
-    spawn(6, -.47, -2.4, Math.PI / 2, 'shake', { outfit: 9 }); spawn(6, .47, -2.4, -Math.PI / 2, 'shake', { outfit: 12 });
+    spawn(6, -.42, -2.4, Math.PI / 2, 'shake', { outfit: 9, meet: [0, -2.4] }); spawn(6, .42, -2.4, -Math.PI / 2, 'shake', { outfit: 12, meet: [0, -2.4] });
     [[-2.3, -2.9, .5], [2.3, -2.9, -.5], [-1.6, -1.2, .7], [1.6, -1.2, -.7], [0, -4.1, 0]].forEach(([x, z, r], k) => spawn(6, x, z, r, 'clap', { outfit: [2, 5, 8, 10, 13][k] }));
     [[-1.8, 7.2], [-.6, 7.4], [.6, 7.3], [1.8, 7.1]].forEach(([x, z], k) => spawn(6, x, z, 0, k % 2 ? 'clap' : 'watch', { outfit: [1, 4, 3, 11][k] }));
     if (/lineup/.test(location.search)) OUTFITS.forEach((o, i) => spawn(0, -5.2 + i * .8, 3.2, Math.PI, 'look', { outfit: i }));

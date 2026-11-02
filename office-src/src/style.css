@@ -32,7 +32,7 @@ body.office .top{opacity:1;pointer-events:auto}
 #chap button:hover{color:#fff}#chap button.on{background:var(--gold);color:#0b1424;font-weight:700}
 
 /* content panel */
-.panel{position:fixed;z-index:15;top:5.2rem;bottom:5rem;width:min(30rem,40vw);overflow:auto;scrollbar-width:thin;padding:1.6rem 1.7rem 1.8rem;border-radius:6px;
+.panel{position:fixed;z-index:15;top:5.2rem;max-height:calc(100vh - 10.4rem);width:min(30rem,40vw);overflow:auto;scrollbar-width:thin;padding:1.6rem 1.7rem 1.8rem;border-radius:6px;
  background:linear-gradient(160deg,rgba(14,22,40,.88),rgba(6,10,20,.9));border:1px solid var(--line);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
  box-shadow:0 30px 80px rgba(0,0,0,.45);transition:opacity .45s,transform .6s cubic-bezier(.2,.8,.2,1)}
 .panel.right{right:clamp(1rem,3vw,2.4rem)}.panel.left{left:clamp(1rem,3vw,2.4rem)}
